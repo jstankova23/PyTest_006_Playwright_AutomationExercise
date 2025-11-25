@@ -1,7 +1,3 @@
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# POZOR - NEDOKONČENÝ TEST, NEFUNGUJE OD KROKU 8 - PROBLÉM S ALERTEM VYVOLANÝM PO KLIKNUTÍ NA TLAČÍTKO SUBMIT, 
-# PLAYWRIGHT NEUMÍ U NĚJ KLIKNOUT NA TLAČÍTKO OK (není pak možné přejít ke kroku 10, 11)
-
 # Sada automatizovaných testů (pytest) na demo e-shop webu 'https://automationexercise.com/'.
 # testy volají fixtures 'page', 'browser_context', 'accept_gdpr' definované v souboru conftest.py.
 # Testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases).
