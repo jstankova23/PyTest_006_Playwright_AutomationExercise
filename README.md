@@ -29,10 +29,9 @@ Projekt obsahuje pozitivní a negativní testy registrace a přihlašování už
 
 ---
 
-## Adresářová struktura projektu
+## Adresářová struktura projektu (nedokončena, fáze vývoje)
 ```
 PyTest_006_Playwright_AutomationExercise/
-│
 ├── tests/
 │   ├── test_00_pw_gdpr.py
 │   ├── test_01_pw_register_positive.py
@@ -40,16 +39,17 @@ PyTest_006_Playwright_AutomationExercise/
 │   ├── test_03_pw_login_negative.py
 │   ├── test_04_pw_logout.py
 │   ├── test_05_pw_register_negative.py
-│   ├── test_06_pw_contact_file_alert.py
+│   ├── test_06_pw_contact_file_alert.py      vyžaduje soubor 'test_files/Sample.docx' (příloha k formuláři)
 │   ├── test_07_pw_test_cases_page.py
 │   ├── test_08_pw_product_pages.py
 │   ├── test_09_pw_product_search.py
 │   └── test_files/
-│       └── Sample.docx
-│
-├── python.env
-├── pytest.ini
-└── README.md
+│       └── Sample.docx                      příloha pro test 'test_06_pw_contact_file_alert.py'
+├── .gitignore
+├── conftest.py                              fixtures
+├── README.md
+└── requirements.txt
+
 ```
 
 ---
