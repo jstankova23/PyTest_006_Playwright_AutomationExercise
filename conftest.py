@@ -3,9 +3,9 @@
 FIXTURES PRO TESTOVÁNÍ DEMO E-SHOP WEBU (PLAYWRIGHT + PYTEST)
 =============================================================================================================================
 Autor:                      Jana Staňková
-Verze projektu:             0.1.0  
+Verze projektu:             0.2.1
 Datum vytvoření:            11. 11. 2025  
-Datum poslední aktualizace: 
+Datum poslední aktualizace: 27. 11. 2025  
 
 # Popis:
 Projekt zahrnuje dvě fixture, které jsou automaticky spuštěny hned na začátku testu pro celou session - fixture **'accept_gdpr'**
@@ -37,10 +37,10 @@ Fixture předává připravenou stránku každému testu. Po každém testu str�
 
 4) Fixture **'temp_user'** vytváří dočasného uživatele **'Temp_User** s dynamicky vygenerovanou mailovou adresou pro každý
 jednotlivý test, který ji ve svém běhu volá. Na konci testu je tento uživatel vždy smazán (testem nebo pomocí této fixture). 
-Uživatel 'Temp_User' je unikátní pouze pro daný běh testu, není sdílen více testy.
+Uživatel 'Temp User' je unikátní pouze pro daný běh testu, není sdílen více testy.
 
 5) Fixture **'session_user'** je spuštěna automaticky hned na začátku testovací session či jednotlivého testu (autouse=True). 
-Založí uživatele **'Session_User'** s dynamicky vytvořeným emailem pro celou testovací session. V rámci jedné testovací session
+Založí uživatele **'Session User'** s dynamicky vytvořeným emailem pro celou testovací session. V rámci jedné testovací session
 je tento uživatel sdílen vícero testy, které se na něj odvolávají. Po doběhnutí všech testů (na konci celé testovací session) 
 fixture tohoto uživatele vymaže.
 
@@ -57,7 +57,7 @@ fixture tohoto uživatele vymaže.
 """
 
 import pytest
-import uuid                                             # pro fixtures 'temp_user', 'static_session_user'
+import uuid                                             # pro fixtures 'temp_user', 'static_session_user' kvůli generování emailů
 from playwright.sync_api import sync_playwright, Page, expect
 
 # 1) FIXTURE PRO ODSOUHLASENÍ GDPR
@@ -127,25 +127,35 @@ def page(browser_context):
     page.close()
 
 
-# 4) FIXTURE PRO VYTVOŘENÍ DOČASNÉHO UŽIVATELE `Temp_User`
+# 4) FIXTURE PRO VYTVOŘENÍ DOČASNÉHO UŽIVATELE `Temp User`
 # fixture vyžaduje import uuid;
-# fixture vytvoří unikátního dynamického uživatele pro každý test, který vyžaduje již existujícího uživatele;
+# fixture vytvoří uživatele 'Temp User' s unikátním dynamicky generovaným emailem pro každý test, který má tuto fixture ve svém parametru;
 # po dokončení testu uživatele smaže, pokud ho nesmazal test
+# tato fixture je vytvořena pro Test Case 2 (testovací funkce 'test_login_positive') v souboru 'test_02_pw_login_positive.py'
 @pytest.fixture
 def temp_user(page: Page):
-    # Generování unikátních dynamických údajů
-    email = f"tempuser_{uuid.uuid4().hex[:8]}@example.com"
+    email = f"tempuser_{uuid.uuid4().hex[:8]}@example.com" # dynamické vygenerování unikátního emailu
     password = "TestPassword123"
+    name = "Temp User"
 
-    # Vytoření dočasného uživatele (kompletní registrace)
+    # Vytoření dočasného uživatele 'Temp User' (kompletní registrace)
     page.goto("https://automationexercise.com/")
     page.get_by_role("link", name=" Signup / Login").click()
 
-    page.get_by_role("textbox", name="Name").fill("Temp_User")
+    page.get_by_role("textbox", name="Name").fill(name)
     page.locator("form").filter(has_text="Signup").get_by_placeholder("Email Address").fill(email)
     page.get_by_role("button", name="Signup").click()
 
-    expect(page.get_by_text("Enter Account Information")).to_be_visible() # čekání na stránku s textem "Enter Account Information"
+    # Vypsání chybové hlášky v případě pokusu založení uživatele s již existujícím emailem (účtem)
+    duplicate_email_error = page.get_by_text("Email Address already exist!")
+
+    if duplicate_email_error.is_visible():
+        raise AssertionError(
+            f"Registrace uživatele {name} selhala – v systému již existuje email: {email}"
+        )
+
+    # V případě úspěšného přihlášení uživatele čekání na stránku s textem "Enter Account Information"
+    expect(page.get_by_text("Enter Account Information")).to_be_visible()
 
     # Vyplnění povinných údajů
     page.check("#id_gender1")
@@ -187,22 +197,21 @@ def temp_user(page: Page):
         page.get_by_role("link", name="Continue").click()
 
 
-# 5) FIXTURE PRO VYTVOŘENÍ JEDNOHO UŽIVATELE `Session_User` PRO CELOU TESTOVACÍ SESSION
+# 5) FIXTURE PRO VYTVOŘENÍ JEDNOHO UŽIVATELE `Session User` PRO CELOU TESTOVACÍ SESSION
 # fixture vyžaduje import uuid;
 # 'autouse=True' zajistí, že se daná fixture spustí automaticky před prvním testem;
-# fixture 'session_user' vytvoří uživatele pro celou statickou session, 
+# fixture 'session_user' vytvoří uživatele 'Session User'pro celou statickou session, 
 # (na rozdíl od fixture 'temp_user', která vytváří unikátního dočasného uživatele 'Temp:User' pro každou funkci);
 # po dokončení všech testů se uživatel SessionUser na závěr přihlásí a vymaže
 @pytest.fixture(scope="session", autouse=True)
 def session_user(browser_context):
     page = browser_context.new_page() # vytvoření vlastní session page uvnitř existujícího browser_contextu
 
-    # Dynamické vygenerování unikátního emailu
-    email = f"sessionuser_{uuid.uuid4().hex[:8]}@example.com"
+    email = f"sessionuser_{uuid.uuid4().hex[:8]}@example.com"  # dynamické vygenerování unikátního emailu
     password = "TestPassword123"
-    name = "Session_User"
+    name = "Session User"
 
-    # Registrace uživatele SessionUser
+    # Vytoření uživatele pro celou testovací session 'Session User' (kompletní registrace)
     page.goto("https://automationexercise.com/")
     page.get_by_role("link", name=" Signup / Login").click()
 
@@ -210,8 +219,16 @@ def session_user(browser_context):
     page.locator("form").filter(has_text="Signup").get_by_placeholder("Email Address").fill(email)
     page.get_by_role("button", name="Signup").click()
 
+    # Vypsání chybové hlášky v případě pokusu založení uživatele s již existujícím emailem (účtem)
+    duplicate_email_error = page.get_by_text("Email Address already exist!")
 
-    expect(page.get_by_text("Enter Account Information")).to_be_visible() # čekání na stránku s textem "Enter Account Information"
+    if duplicate_email_error.is_visible():
+        raise AssertionError(
+            f"Registrace uživatele {name} selhala – v systému již existuje email: {email}"
+        )
+
+    # V případě úspěšného přihlášení uživatele čekání na stránku s textem "Enter Account Information"
+    expect(page.get_by_text("Enter Account Information")).to_be_visible()
 
     # Vyplnění povinných údajů
     page.check("#id_gender1")

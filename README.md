@@ -4,9 +4,9 @@ Automatizované UI testy pro demo e‑shop https://automationexercise.com/ pomoc
 > Projekt je aktuálně v aktivním vývoji (work in progress).
 
 **Autor:**                      Jana Staňková  
-**Verze projektu:**             0.1.0 
+**Verze projektu:**             0.2.1 
 **Datum vytvoření:**            11. 11. 2025  
-**Datum poslední aktualizace:** 
+**Datum poslední aktualizace:** 27. 11. 2025 
 **Python:**                     3.10+  
 **Licence:**                    MIT  
 
@@ -43,6 +43,7 @@ PyTest_006_Playwright_AutomationExercise/
 │   ├── test_07_pw_test_cases_page.py
 │   ├── test_08_pw_product_pages.py
 │   ├── test_09_pw_product_search.py
+│   ├── test_10_pw_subsribe_footer.py
 │   └── test_files/
 │       └── Sample.docx                      příloha pro test 'test_06_pw_contact_file_alert.py'
 ├── .gitignore
@@ -59,6 +60,7 @@ PyTest_006_Playwright_AutomationExercise/
 Níže je kompletní přepis seznamu Test Cases ze stránky:  
 https://automationexercise.com/test_cases
 
+### **Test Case 0:** Accept GDPR (přidáno, není v seznamu Test Cases)
 ### **Test Case 1:** Register User  
 ### **Test Case 2:** Login User with correct email and password  
 ### **Test Case 3:** Login User with incorrect email and password  
@@ -95,13 +97,68 @@ https://automationexercise.com/test_cases
 
 ---
 
-## Strategie uživatelů a e‑mailů
+## Strategie uživatelů v testech
 
-Architektura uživatelů řeší nezávislost jednotlivých testů. Testy si navzájem neovlivňují data a lze je spouště opakovaně a hromadně ve stejný čas. Koncept zahrnuje 3 typy uživatelů:
+Architektura uživatelů je navržena tak, aby byla zajištěna **nezávislost jednotlivých testů**. Testy si vzájemně neovlivňují data a lze je spouštět opakovaně i paralelně.  
+Projekt pracuje se třemi typy testovacích uživatelů:
 
-1. **Test_User** – unikátní uživatel vygenerovaný testovací funkcí 'test_registration_positive' ze souboru 'test_01_pw_register_positive.py', na závěr testu je uživatel vymazán, k vygenerování uživatele neslouží žádná fixture, email je hardcoded v kódu daného testu
-2. **Temp_User** – unikátní uživatel pro každou jednotlivou funkci volající fixture 'temp_user', uživatel je na konci každého testu vymazán přímo v testu nebo pomocí fixture 'temp_user', tzn. životnost uživatele 'Temp_User' je pouze pro jeden test, email uživatele je dynamicky generován
-3. **Session_User** – sdílený uživatel pro všechny testy volající fixture 'session_user', uživatel je po doběhnutí všech testů vymazán pomocí fixture 'session_user', tzn. životnost uživatele 'Session_User' je po dobu testování celé session, tento uživatel je vytvořen automaticky vždy hned na začátku spuštění testovací session nebo jakéhokoliv jednotlivého testu, i když daný test uživatele 'Session_User' nepoužívá, email uživatele je dynamicky generován
+### 1. **Test User**
+- Uživatelský účet je vytvořen **přímo v testu** `test_registration_positive` (`test_01_pw_register_positive.py`)
+- Email je **dynamicky generován**
+- Uživatel je **na konci testu smazán v rámci testu**
+- Nepoužívá žádnou fixture
+- Slouží výhradně pro **Test Case 1**
+
+### 2. **Temp User**
+- Uživatel je vytvořen pomocí fixture **`temp_user`**
+- Email je **dynamicky generován**
+- Uživatel je **na konci každého testu smazán pomocí stejné fixture**
+- Životnost uživatele = **jeden konkrétní test**
+- Používán pro testy vyžadující izolovaného uživatele
+
+### 3. **Session User**
+- Uživatel je vytvořen pomocí fixture **`session_user`**
+- Email je **dynamicky generován**
+- Uživatel je **sdílen napříč celou testovací session**
+- Smazání probíhá **až po dokončení všech testů**
+- Používán pro testy, které vyžadují sdílené přihlášení
+
+---
+
+### Přehledná tabulka uživatelů
+
+| Typ uživatele  | Email        | Vytváří                | Maže                   | Použití     |
+|----------------|--------------|------------------------|------------------------|-------------|
+| **Test User**   | dynamický   | samotný test           | samotný test           | jen TC01    |
+| **Temp User**   | dynamický   | fixture `temp_user`    | fixture `temp_user`    | per-test    |
+| **Session User**| dynamický   | fixture `session_user` | fixture `session_user` | celý běh    |
+
+---
+
+### Ošetření selhání registrace uživatele
+
+U všech tří typů uživatelů je používán **dynamicky generovaný email**, což minimalizuje riziko kolizí s cizími testovacími daty na veřejném demo e-shopu.
+
+Přesto jsou:
+- všechny **fixtures a test pro Test Case 1 ošetřeny chybovou hláškou** pro případ, že by se i přesto pokusily o registraci s již existujícím emailem,
+- pro ladění je doporučeno spouštění testů s příznaky:
+
+```bash
+pytest -s -v
+
+---
+
+## Notifikace
+
+V rámci testů v Playwrightu jsou zpracovávány různé typy notifikací:
+
+1. **JavaScript alert se zpožděným výskytem**  
+   Test Case 6 – Contact Us Form  
+   `test_06_pw_contact_file_alert.py`
+
+2. **Dočasná notifikační hláška v DOM (flash message / success message)**  
+   Test Case 10 – Verify Subscription in home page  
+   `test_10_pw_subscribe_footer.py`
 
 ---
 

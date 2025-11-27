@@ -6,7 +6,7 @@ from playwright.sync_api import Page, expect
 
 # 04_TEST CASE: Logout User
 # ODHLÁŠENÍ UŽIVATELE DO DEMO E-SHOP WEBU 'https://automationexercise.com/
-# test volá fixture 'static_user', která vytváří pro celou testovací session jednoho fixního uživatele a maže ho až po doběhnutí všech testů za celou session
+# test volá fixture 'session user', která vytváří pro celou testovací session jednoho fixního uživatele a maže ho až po doběhnutí všech testů za celou session
 def test_logout(page: Page, session_user):
     # 1. Launch browser; 
     # 2. Navigate to home url;

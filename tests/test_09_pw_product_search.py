@@ -19,7 +19,7 @@ def test_product_search(page: Page):
     
     # 5. Verify user is navigated to ALL PRODUCTS page successfully (new page)
     all_products_heading = page.get_by_role("heading", name="All Products")   # lokátor pro nadpis 'ALL PRODUCTS' na nové stránce
-    expect(all_products_heading).to_be_visible(timeout=2000)       # ověření přesměrování na stránku s daným nadpisem a zpomalení
+    expect(all_products_heading).to_be_visible(timeout=5000) # ověření přesměrování na stránku s daným nadpisem a delší zpomalení (problém s heavy load na stránce)
 
     # 6. Enter product name in search input and click search button
     ### test vyhledání všech produktů s klíčovým slovem 'top' zadaným do vyhledavače

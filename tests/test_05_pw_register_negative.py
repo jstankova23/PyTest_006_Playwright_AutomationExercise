@@ -6,7 +6,7 @@ from playwright.sync_api import Page, expect
 
 # 05_TEST CASE: Register user with existing email - Negative Test
 # TEST NEŮSPĚŠENÉHO POKUSU O REGISTRACI UŽIVATELE S JIŽ EXISTUJÍCÍM EMAILEM V DEMO E-SHOP WEBU 'https://automationexercise.com/'
-# test využívá email uživatele SessionUser, kterého na začátku testovací session vytváří fixture 'session_user' a předává data uživatele SessionUser testům;
+# test využívá email uživatele 'Session User', kterého na začátku testovací session vytváří fixture 'session_user' a předává data uživatele SessionUser testům;
 # takto je zajištěno, že test použije email již existujícího uživatele pro danou testovací session, a tím pádem se nepodaří tomuto testu založit dalšího uživatele;
 # očekávaný výsledek: aplikace nedovolí zaregistrovat uživatele 'Test Email Duplicity', zobrazí chybovou hlášku, že uvedený email už v databázi uživatelů existuje
 def test_registration_negative(page: Page, session_user):

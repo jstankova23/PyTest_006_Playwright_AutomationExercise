@@ -3,10 +3,11 @@
 # testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases)
 
 from playwright.sync_api import Page, expect
+import uuid                                             # kvůli generování emailu v kroku 9
 
 # 01_TEST CASE: Register User - Positive Test
 # REGISTRACE UŽIVATELE DO DEMO E-SHOP WEBU 'https://automationexercise.com/' 
-# vytvořený uživatel je v závěru tohoto testu vymazán
+# vytvořený uživatel 'Test User' s dynamickým emailem je v závěru tohoto testu vymazán
 def test_registration_positive(page: Page):
     # 1. Launch browser; 
     # 2. Navigate to home url;
@@ -19,24 +20,32 @@ def test_registration_positive(page: Page):
     
     # 5. Verify 'New User Signup!' is visible (new page)
     new_user_heading = page.get_by_role("heading", name="New User Signup!")   # lokátor pro nadpis 'New User Signup!' na nové stránce
-    expect(new_user_heading).to_be_visible(timeout=5000)  # ověření přesměrování na stránku s daným nadpisem a zpomalení
+    expect(new_user_heading).to_be_visible(timeout=2000)  # ověření přesměrování na stránku s daným nadpisem a zpomalení
 
     # 6. Enter name and email address
-    ### uložení hodnot do proměnných
-    name = "Test User"                      
-    email = "test_user@test.com"      
+    ### Uložení hodnot do proměnných
+    name = "Test User"               
+    email = f"test_user_{uuid.uuid4().hex[:8]}@example.com"      # dynamický email
 
-    ### lokátory
+    ### Lokátory
     name_input = page.get_by_role("textbox", name="Name")                                            
     email_input = page.locator("form").filter(has_text="Signup").get_by_placeholder("Email Address") 
 
-    ### vyplnění polí hodnotami proměnných
+    ### Vyplnění polí hodnotami proměnných
     name_input.fill(name)                       
     email_input.fill(email)                     
- 
+    
     # 7. Click 'Signup' button
     signup_btn = page.get_by_role("button", name="Signup")  # lokátor tlačítka "Signup"
     signup_btn.click()                                      # kliknutí na tlačítko "Signup"
+
+    ### Chybová hláška v případě pokusu založení uživatele s již existujícím emailem (účtem)
+    duplicate_email_error = page.get_by_text("Email Address already exist!")   # lokátor chybové hlášky
+
+    if duplicate_email_error.is_visible():
+        raise AssertionError(
+            f"Registrace uživatele {name} selhala – v systému již existuje email: {email}"
+        )
 
     # 8. Verify that 'ENTER ACCOUNT INFORMATION' is visible (new page)
     new_page_heading = page.get_by_text("Enter Account Information") # lokátor pro nadpis 'Enter Account Information' na nové stránce
@@ -64,7 +73,7 @@ def test_registration_positive(page: Page):
     offers.check()                                                # zaškrtnutí pole pro speicální nabídky
 
     # 12. Fill details: First name, Last name, Company, Address, Address2, Country, State, City, Zipcode, Mobile Number (Address Information section)
-    ### uložení hodnot pro adresu a telefon uživatele do proměnných
+    ### Uložení hodnot pro adresu a telefon uživatele do proměnných
     first_name = "Jana"                     
     last_name = "Nováková"                  
     company = "AutoTest"                    
@@ -75,7 +84,7 @@ def test_registration_positive(page: Page):
     zip_code = "34232"                      
     mobile_num ="(941) 555-4827"            
 
-    ### lokátory 
+    ### Lokátory 
     first_name_input = page.get_by_role("textbox", name="First name *")                    
     last_name_input = page.get_by_role("textbox", name="Last name *")                  
     company_input = page.get_by_role("textbox", name="Company", exact=True)                      
@@ -86,7 +95,7 @@ def test_registration_positive(page: Page):
     zip_code_input = page.locator("#zipcode")                      
     mobile_num_input = page.get_by_role("textbox", name="Mobile Number *")     
 
-    ### vyplnění polí
+    ### Vyplnění polí
     first_name_input.fill(first_name)                    
     last_name_input.fill(last_name)                
     company_input.fill(company)                      
@@ -97,7 +106,7 @@ def test_registration_positive(page: Page):
     zip_code_input.fill(zip_code)                     
     mobile_num_input.fill(mobile_num)
     
-    ### výběr z roletového menu v poli Country
+    ### Výběr z roletového menu v poli Country
     country_dropdown = page.get_by_label("Country *")   # lokátor pole Country s roletovým menu
     country_dropdown.select_option("United States")     # výběr konkrétní hodnoty z roletového menu
 
