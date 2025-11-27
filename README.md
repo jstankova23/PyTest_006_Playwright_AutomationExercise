@@ -4,7 +4,7 @@ Automatizované UI testy pro demo e‑shop https://automationexercise.com/ pomoc
 > Projekt je aktuálně v aktivním vývoji (work in progress).
 
 **Autor:**                      Jana Staňková  
-**Verze projektu:**             0.2.1 
+**Verze projektu:**             0.3.2 
 **Datum vytvoření:**            11. 11. 2025  
 **Datum poslední aktualizace:** 27. 11. 2025 
 **Python:**                     3.10+  
@@ -43,7 +43,8 @@ PyTest_006_Playwright_AutomationExercise/
 │   ├── test_07_pw_test_cases_page.py
 │   ├── test_08_pw_product_pages.py
 │   ├── test_09_pw_product_search.py
-│   ├── test_10_pw_subsribe_footer.py
+│   ├── test_10_pw_subsribe_home_footer.py
+│   ├── test_11_pw_subsribe_cart_footer.py
 │   └── test_files/
 │       └── Sample.docx                      příloha pro test 'test_06_pw_contact_file_alert.py'
 ├── .gitignore

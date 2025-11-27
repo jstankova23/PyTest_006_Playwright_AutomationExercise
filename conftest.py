@@ -3,7 +3,7 @@
 FIXTURES PRO TESTOVÁNÍ DEMO E-SHOP WEBU (PLAYWRIGHT + PYTEST)
 =============================================================================================================================
 Autor:                      Jana Staňková
-Verze projektu:             0.2.1
+Verze projektu:             0.3.2
 Datum vytvoření:            11. 11. 2025  
 Datum poslední aktualizace: 27. 11. 2025  
 

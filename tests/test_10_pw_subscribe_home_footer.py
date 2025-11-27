@@ -4,9 +4,9 @@
 
 from playwright.sync_api import Page, expect
 
-# 08_TEST CASE: Verify Subscription in home page
-# OVĚŘENÍ ZOBRAZENÍ DOČASNÉ HLÁŠKY PO ZADÁNÍ EMAILU K ODBĚRU NOVINEK V ZÁPATÍ DOMOVSKÉ STRÁNKY
-def test_product_pages(page: Page):
+# 10_TEST CASE: Verify Subscription in home page
+# TEST REGISTRACE K ODBĚRU NOVINEK ZE ZÁPATÍ DOMOVSKÉ STRÁNKY, I S POTVRZENÍM DOČASNÉ HLÁŠKY
+def test_subscibe_home_footer(page: Page):
     # 1. Launch browser; 
     # 2. Navigate to home url;
     # 3. Verify that home page is visible successfully
