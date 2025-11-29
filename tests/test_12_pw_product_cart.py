@@ -32,7 +32,7 @@ def test_product_cart(page: Page):
     first_product.hover()
 
     add_to_cart_prod1_btn = page. locator(".overlay-content > .btn").nth(0)  # lokátor pro tlačítko 'Add to cart' u 1. produktu s krycí vrstvou
-    add_to_cart_prod1_btn.click()
+    add_to_cart_prod1_btn.click()                                            # kliknutí na tlačítko 'Add to cart', tzn. přidání 1. produktu do košíku
 
     # 6. Click 'Continue Shopping' button
     continue_shop_btn = page.get_by_role("button", name="Continue Shopping")    # lokátor tlačítka 'Continue Shopping'
@@ -46,7 +46,7 @@ def test_product_cart(page: Page):
     second_product.hover()
 
     add_to_cart_prod2_btn = page. locator(".overlay-content > .btn").nth(1)  # lokátor pro tlačítko 'Add to cart' u 2. produktu s krycí vrstvou
-    add_to_cart_prod2_btn.click()                                            # kliknutí na tlačítko 'Add to cart' (tzn. přidání do košíku)
+    add_to_cart_prod2_btn.click()                                            # kliknutí na tlačítko 'Add to cart', tzn. přidání 2. produktu do košíku
     
     # 8. Click 'View Cart' button
     view_cart_link = page.get_by_role("link", name="View Cart")    # lokátor pro link 'View Cart' v zobrazeném oknu

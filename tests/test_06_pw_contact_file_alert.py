@@ -73,14 +73,28 @@ def test_contact_file_alert(page: Page):
 
     # 10. Verify success message 'Success! Your details have been submitted successfully.' is visible 
     success_msg = page.locator("#contact-page .alert-success")        # lokátor cílového textu / nadpisu
+
     expect(success_msg).to_be_visible(timeout=1000)                   # čekání, dokud se nezobrazí očekávaný text / nadpis
 
     # 11. Click 'Home' button and verify that landed to home page successfully
-    # Pozor: Na stránce jsou 2 linky 'Home' se stejným funkčím lokátorem v Playwright Inspectoru (pod hláškou o úspěchu a v záhlaví stránky).
-    # page.get_by_role("link", name=" Home") - tento funkční lokátor je na stránce duplicitní.
-    # Je třeba jednoznačně identifikovat tlačítko/link pomocí CSS lokátoru.
+    ### Pozor: Na stránce jsou 2 linky 'Home' se stejným funkčím lokátorem v Playwright Inspectoru (pod hláškou o úspěchu a v záhlaví stránky).
+    ### page.get_by_role("link", name=" Home") - tento funkční lokátor je na stránce duplicitní.
+    ### Je třeba jednoznačně identifikovat tlačítko/link pomocí CSS lokátoru.
     home_sucess_btn = page.locator("a.btn.btn-success") # CSS lokátor pro tlačítko/link 'Home' pod hláškou o úspěchu (ne link 'Home' v záhlaví stránky)
-    home_sucess_btn.click() # kliknutí na dané tlačítko/link 'Home' 
-    expect(page).to_have_url("https://automationexercise.com/")    # čekání, dokud se nezobrazí domovská stránka
+    home_sucess_btn.click()                                             # kliknutí na dané tlačítko/link 'Home' 
+
+    ### Ověření přechodu na domovskou stránku
+    ### a) Technické ověření přesměrování na domovskou stránku (kontrola URL)
+    expect(page).to_have_url("https://automationexercise.com/")    
+
+    ### b) Uživatelské ověření, že je skutečně zobrazena domovská stránka
+    ### Ověření proběhne přes potvrzení existence tlačítka (linku) s nadpisem 'Test Cases'v Hero banneru domovské stránky.
+    ### hero banner = <section id="slider">
+    ### Slider rotuje (na domovské stránce se obměňují 3 různé slidy, ale každý obsahuje zelené tlačítko (link) s textem 'Test Cases'.
+    ### V CSS lokátoru je nutné použít 2 třídy: .item.active pro výběr právě zobrazeného slidu, vždy je aktivní a viditelný pro uživatele pouze jeden slide,
+    ### bez lokátoru tříd (.item.active) Playwright neví, ze kterých 3 slidů má dané tlačítko vybrat
+    hero_test_cases_btn = page.locator("section#slider .item.active a[href='/test_cases'] > button") # CSS složený lokátor pro tlačítko/link 'Test Cases'
+    expect(hero_test_cases_btn).to_be_visible()
+           
 
 

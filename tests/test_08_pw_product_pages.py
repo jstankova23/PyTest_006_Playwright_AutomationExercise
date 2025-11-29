@@ -13,14 +13,17 @@ def test_product_pages(page: Page):
     # 3. Verify that home page is visible successfully
     assert page.url == "https://automationexercise.com/"             # ověření, že fixture 'page' otevřela správnou url
     
+
     # 4. Click on 'Products' button
     products_link = page.get_by_role("link", name=" Products")     # vyhledání linku pro 'Products' stránku
     products_link.click()                                           # kliknutí na link 'Products'
     
+
     # 5. Verify user is navigated to ALL PRODUCTS page successfully (new page)
     ### ověření, že se zobrazí na stránce nadpis 'ALL PRODUCTS'
     all_products_heading = page.get_by_role("heading", name="All Products")   # lokátor pro nadpis 'ALL PRODUCTS' na nové stránce
     expect(all_products_heading).to_be_visible(timeout=2000)       # ověření přesměrování na stránku s daným nadpisem a zpomalení
+
 
     # 6. The products list is visible
     ### Seznam produktů je na stránce reprezentovaný gridem / mřížkou karet produktů;
@@ -33,15 +36,24 @@ def test_product_pages(page: Page):
     ### 1. karta / produkt: .product-image-wrapper.first nebo .product-image-wrapper.nth(0)
     view_product1_link = page.locator(".nav.nav-pills.nav-justified > li > a").first     # lokalizátor pro link 'View Product' u 1. zobrazeného produktu
     view_product1_link.click()                                                           # kliknutí na link
-    # 8. User is landed to product detail page
-    expect(page).to_have_url("https://automationexercise.com/product_details/1")             # vyčkání na přesměrování na stránku s detaily o 1. produktu
     
+                                                     
+    # 8. User is landed to product detail page
+    ### a) technické ověření přesměrování (kontrola URL)
+    expect(page).to_have_url("https://automationexercise.com/product_details/1")         # vyčkání na přesměrování na stránku s detaily o 1. produktu
+    
+    ### b) uživatelské ověření
+    ### ověření na základě bloku s detaily o produktu (název, kategorie, cena, dostupnost, stav, značka), tento blok není na home page, jen na stránce 'product_details'
+    product_info_block = page.locator("div.product-information") # lokátor pro blok s detaily pro každý produkt
+    expect(product_info_block).to_be_visible()
+
+
     # 9. Verify that product detail is visible: product name, category, price, availability, condition, brand
     
     ### lokátory pro pole určená pro detailní informace o produktu
     ##### nejsou spjaté s konkrétní hodnotou, 1.produkt se může v čase měnit)
     ##### funkční lokátory z Playwright Inspectora nejsou jednoznačné, nutné použít CSS lokátory
-    product_name = page.locator("div.product-information > h2")         # product_name = page.locator(".product-information h2") - VYMAZAT
+    product_name = page.locator("div.product-information > h2") # lokátor pro blok s detaily zacílený na nadpis / název produktu       
     category = page.locator("p:has-text('Category')")
     price = page.locator("div.product-information span").first  # locator("span:has-text('Rs.')") není jednoznačný pro danou stránku
     availability = page.locator("p:has-text('Availability')")

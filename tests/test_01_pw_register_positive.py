@@ -7,7 +7,7 @@ import uuid                                             # kvůli generování em
 
 # 01_TEST CASE: Register User - Positive Test
 # REGISTRACE UŽIVATELE DO DEMO E-SHOP WEBU 'https://automationexercise.com/' 
-# vytvořený uživatel 'Test User' s dynamickým emailem je v závěru tohoto testu vymazán
+# vytvořený uživatel 'Test_1 User' s dynamickým emailem je v závěru tohoto testu vymazán
 def test_registration_positive(page: Page):
     # 1. Launch browser; 
     # 2. Navigate to home url;
@@ -15,17 +15,17 @@ def test_registration_positive(page: Page):
     assert page.url == "https://automationexercise.com/"             # ověření, že fixture 'page' otevřela správnou url
     
     # 4. Click on 'Signup / Login' button
-    login_link = page.get_by_role("link", name=" Signup / Login")   # vyhledání linku pro přihlášení uživatele
+    login_link = page.get_by_role("link", name=" Signup / Login")   # vyhledání linku v záhlaví domovské stránky pro přihlášení uživatele
     login_link.click()                                               # kliknutí na link pro přihlášení uživatele
     
     # 5. Verify 'New User Signup!' is visible (new page)
     new_user_heading = page.get_by_role("heading", name="New User Signup!")   # lokátor pro nadpis 'New User Signup!' na nové stránce
-    expect(new_user_heading).to_be_visible(timeout=2000)  # ověření přesměrování na stránku s daným nadpisem a zpomalení
+    expect(new_user_heading).to_be_visible(timeout=2000)  # ověření s automatizovaným čekáním, že se na stránce objevil cílený nadpis
 
     # 6. Enter name and email address
     ### Uložení hodnot do proměnných
-    name = "Test User"               
-    email = f"test_user_{uuid.uuid4().hex[:8]}@example.com"      # dynamický email
+    name = "Test_1 User"               
+    email = f"test_1_user_{uuid.uuid4().hex[:8]}@example.com"      # dynamický email
 
     ### Lokátory
     name_input = page.get_by_role("textbox", name="Name")                                            
@@ -49,15 +49,15 @@ def test_registration_positive(page: Page):
 
     # 8. Verify that 'ENTER ACCOUNT INFORMATION' is visible (new page)
     new_page_heading = page.get_by_text("Enter Account Information") # lokátor pro nadpis 'Enter Account Information' na nové stránce
-    expect(new_page_heading).to_be_visible(timeout=2000)  # ověření přesměrování na stránku s daným nadpisem a zpomalení
+    expect(new_page_heading).to_be_visible(timeout=2000)  # ověření s automatizovaným čekáním, že se na stránce objevil cílený nadpis
 
     # 9. Fill details: Title, Name, Email, Password, Date of birth
-    title_mrs = page.get_by_role("radio", name="Mrs.")   # lokátor zaškrtávacího pole "Title - Mrs."
-    title_mrs.check()                                    # zaškrtnutí pole "Title - Mrs."
+    title = page.locator("#id_gender2")                      # gender2 = Mrs. / Paní 
+    title.check()  
 
-    pswd = "TestPassword"                      # uložení uživatelského jména do proměnné
+    pswd = "TestPassword123"                                    # uložení hesla do proměnné
     pswd_input = page.get_by_role("textbox", name="Password *") # lokátor pole Password
-    pswd_input.fill(pswd)                      # vyplnění pole Password
+    pswd_input.fill(pswd)                                       # vyplnění pole Password
 
     ### datum narození: 1. ledna 2000
     page.select_option("#days", "1")        
@@ -74,11 +74,11 @@ def test_registration_positive(page: Page):
 
     # 12. Fill details: First name, Last name, Company, Address, Address2, Country, State, City, Zipcode, Mobile Number (Address Information section)
     ### Uložení hodnot pro adresu a telefon uživatele do proměnných
-    first_name = "Jana"                     
-    last_name = "Nováková"                  
+    first_name = "Test_1"                     
+    last_name = "User"                  
     company = "AutoTest"                    
     address1 = "4520 Palm Breeze Lane"      
-    address2 = "Apt. 12B"                   
+    address2 = "Apt. 12B"         
     state = "Florida"                       
     city = "Sarasota"                       
     zip_code = "34232"                      
@@ -89,7 +89,7 @@ def test_registration_positive(page: Page):
     last_name_input = page.get_by_role("textbox", name="Last name *")                  
     company_input = page.get_by_role("textbox", name="Company", exact=True)                      
     address1_input = page.get_by_role("textbox", name="Address * (Street address, P.")    
-    address2_input = page.get_by_role("textbox", name="Address 2")                
+    address2_input = page.get_by_role("textbox", name="Address 2")         
     state_input = page.get_by_role("textbox", name="State *")                      
     city_input = page.get_by_role("textbox", name="City * Zipcode *")                       
     zip_code_input = page.locator("#zipcode")                      
@@ -100,7 +100,7 @@ def test_registration_positive(page: Page):
     last_name_input.fill(last_name)                
     company_input.fill(company)                      
     address1_input.fill(address1)  
-    address2_input.fill(address2)                 
+    address2_input.fill(address2)    
     state_input.fill(state)                     
     city_input.fill(city)                      
     zip_code_input.fill(zip_code)                     

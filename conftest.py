@@ -35,7 +35,7 @@ Tester si může toto nastavení změnit na běh testu s viditelným oknem prohl
 Odstraňuje v intervalech reklamní banner v iframe, což při běhu testu na pozadí není nutností a tuto část je možné zakomentovat. 
 Fixture předává připravenou stránku každému testu. Po každém testu stránku zavře.
 
-4) Fixture **'temp_user'** vytváří dočasného uživatele **'Temp_User** s dynamicky vygenerovanou mailovou adresou pro každý
+4) Fixture **'temp_user'** vytváří dočasného uživatele **'Temp User** s dynamicky vygenerovanou mailovou adresou pro každý
 jednotlivý test, který ji ve svém běhu volá. Na konci testu je tento uživatel vždy smazán (testem nebo pomocí této fixture). 
 Uživatel 'Temp User' je unikátní pouze pro daný běh testu, není sdílen více testy.
 
@@ -51,13 +51,13 @@ fixture tohoto uživatele vymaže.
 | `accept_gdpr`     | session   | Ano                      | přijetí GDPR |
 | `browser_context` | session   | Ne                       | sdílený prohlížeč a kontext pro všechny testy |
 | `page`            | function  | Ne                       | nová stránka s domovskou URL pro každý test |
-| `temp_user`       | function  | Ne                       | uživatel **Temp_User** unikátní pro každý test, smazán na konci testu |
-| `session_user`    | session   | Ano                      | uživatel **Session_User** pro celou session, smazán na konci všech testů |
+| `temp_user`       | function  | Ne                       | uživatel **Temp User** unikátní pro každý test, smazán na konci testu |
+| `session_user`    | session   | Ano                      | uživatel **Session User** pro celou session, smazán na konci všech testů |
 
 """
 
 import pytest
-import uuid                                             # pro fixtures 'temp_user', 'static_session_user' kvůli generování emailů
+import uuid                                             # pro fixtures 'temp_user', 'session_user' kvůli generování emailů
 from playwright.sync_api import sync_playwright, Page, expect
 
 # 1) FIXTURE PRO ODSOUHLASENÍ GDPR
@@ -134,11 +134,11 @@ def page(browser_context):
 # tato fixture je vytvořena pro Test Case 2 (testovací funkce 'test_login_positive') v souboru 'test_02_pw_login_positive.py'
 @pytest.fixture
 def temp_user(page: Page):
-    email = f"tempuser_{uuid.uuid4().hex[:8]}@example.com" # dynamické vygenerování unikátního emailu
-    password = "TestPassword123"
     name = "Temp User"
+    email = f"temp_user_{uuid.uuid4().hex[:8]}@example.com" # dynamické vygenerování unikátního emailu
+    password = "TestPassword123"
 
-    # Vytoření dočasného uživatele 'Temp User' (kompletní registrace)
+    # Vytvoření dočasného uživatele 'Temp User' (kompletní registrace)
     page.goto("https://automationexercise.com/")
     page.get_by_role("link", name=" Signup / Login").click()
 
@@ -158,18 +158,24 @@ def temp_user(page: Page):
     expect(page.get_by_text("Enter Account Information")).to_be_visible()
 
     # Vyplnění povinných údajů
-    page.check("#id_gender1")
+    page.check("#id_gender2")                   # oslovení Mrs. / paní
     page.fill("#password", password)
     page.select_option("#days", "10")
     page.select_option("#months", "5")
     page.select_option("#years", "1990")
     page.fill("#first_name", "Temp")
     page.fill("#last_name", "User")
+    # pole 'Company' nevyplňuje
     page.fill("#address1", "123 Test Street")
+    # pole 'address2' nevyplňuje
     page.fill("#state", "Florida")
     page.fill("#city", "Sarasota")
     page.fill("#zipcode", "34201")
     page.fill("#mobile_number", "+19415550123")
+
+    # Výběr hodnoty Country z roletového menu
+    country_dropdown = page.get_by_label("Country *")
+    country_dropdown.select_option("United States")
 
     # Dokončení registrace
     page.get_by_role("button", name="Create Account").click()
@@ -201,15 +207,15 @@ def temp_user(page: Page):
 # fixture vyžaduje import uuid;
 # 'autouse=True' zajistí, že se daná fixture spustí automaticky před prvním testem;
 # fixture 'session_user' vytvoří uživatele 'Session User'pro celou statickou session, 
-# (na rozdíl od fixture 'temp_user', která vytváří unikátního dočasného uživatele 'Temp:User' pro každou funkci);
-# po dokončení všech testů se uživatel SessionUser na závěr přihlásí a vymaže
+# (na rozdíl od fixture 'temp_user', která vytváří unikátního dočasného uživatele 'Temp User' pro každou funkci);
+# po dokončení všech testů se uživatel Session User na závěr přihlásí a vymaže
 @pytest.fixture(scope="session", autouse=True)
 def session_user(browser_context):
     page = browser_context.new_page() # vytvoření vlastní session page uvnitř existujícího browser_contextu
 
-    email = f"sessionuser_{uuid.uuid4().hex[:8]}@example.com"  # dynamické vygenerování unikátního emailu
-    password = "TestPassword123"
     name = "Session User"
+    email = f"session_user_{uuid.uuid4().hex[:8]}@example.com"  # dynamické vygenerování unikátního emailu
+    password = "TestPassword123"
 
     # Vytoření uživatele pro celou testovací session 'Session User' (kompletní registrace)
     page.goto("https://automationexercise.com/")
@@ -231,19 +237,25 @@ def session_user(browser_context):
     expect(page.get_by_text("Enter Account Information")).to_be_visible()
 
     # Vyplnění povinných údajů
-    page.check("#id_gender1")
+    page.check("#id_gender1")                   # oslovení Mr. / pán
     page.fill("#password", password)
     page.select_option("#days", "10")
     page.select_option("#months", "5")
     page.select_option("#years", "1990")
     page.fill("#first_name", "Session")
     page.fill("#last_name", "User")
+    # pole 'Company' nevyplňuje
     page.fill("#address1", "123 Test Street")
+    # pole 'address2' nevyplňuje
     page.fill("#state", "Florida")
     page.fill("#city", "Sarasota")
     page.fill("#zipcode", "34201")
     page.fill("#mobile_number", "+19415550123")
 
+    # Výběr hodnoty Country z roletového menu
+    country_dropdown = page.get_by_label("Country *")
+    country_dropdown.select_option("United States")
+    
     # Dokončení registrace
     page.get_by_role("button", name="Create Account").click()
     expect(page.get_by_text("Account Created!")).to_be_visible()   # Vyčkání na potvrzení o úspěšně vytvořeném uživateli
@@ -273,7 +285,7 @@ def session_user(browser_context):
 
     expect(page.get_by_text("Logged in as")).to_be_visible() # čekání, dokud se v záhlaví stránky neobjeví text "příhlášen jako"
 
-    # Smazání uživatele SessionUser
+    # Smazání uživatele Session User
     page.goto("https://automationexercise.com/delete_account")
     expect(page.get_by_text("Account Deleted!")).to_be_visible()
     page.get_by_role("link", name="Continue").click()
