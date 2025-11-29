@@ -52,7 +52,7 @@ def test_registration_positive(page: Page):
     expect(new_page_heading).to_be_visible(timeout=2000)  # ověření s automatizovaným čekáním, že se na stránce objevil cílený nadpis
 
     # 9. Fill details: Title, Name, Email, Password, Date of birth
-    title = page.locator("#id_gender2")                      # gender2 = Mrs. / Paní 
+    title = page.locator("#id_gender2")                      # gender2 = Mrs. / paní 
     title.check()  
 
     pswd = "TestPassword123"                                    # uložení hesla do proměnné

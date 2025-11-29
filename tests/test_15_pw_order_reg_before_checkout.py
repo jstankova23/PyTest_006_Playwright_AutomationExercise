@@ -5,87 +5,30 @@
 from playwright.sync_api import Page, expect
 import uuid                                             # kvůli generování emailu v kroku 9
 
-# 14: Place Order: Register while Checkout
-# TEST PŘIDÁNÍ 4 KUSŮ JAKÉHOKOLIV PRODUKTU DO NÁKUPNÍHO KOŠÍKU PŘÍMO Z DOMOVSKÉ STRÁNKY SE ZÁVĚREČNOU KONTROLOU SPRÁVNÉHO MNOŽSTVÍ V KOŠÍKU
-def test_order_reg_checkout(page: Page):
+# 15: Place Order: Register before Checkout
+# TEST: OOBJEDNÁVKA 6. A 7. PRODUKTU S REGISTRACÍ UŽIVATELE 'Test_15 User' PŘED VYSTAVENÍM OBJEDNÁVKY, PLATBA A SMAZÁNÍ UŽIVATELE
+def test_order_reg_before_checkout(page: Page):
     # 1. Launch browser; 
     # 2. Navigate to home url;
     # 3. Verify that home page is visible successfully
     assert page.url == "https://automationexercise.com/"             # ověření, že fixture 'page' otevřela správnou url
     
 
-    # 4. Add products to cart
-    ### Přidání produktu č. 3 a 4 do nákupního košíku.
-    ### Seznam produktů je na stránce reprezentovaný gridem / mřížkou karet produktů;
-    ### každý produkt = jedna karta (v gridu / mřížce)
-    ### všechny karty mají stejnou třídu <div class="product-image-wrapper">...</div>
-    ### 3. karta / produkt: .product-image-wrapper.nth(2)
-    ### 4. karta / produkt: .product-image-wrapper.nth(3)
-
-    ### 3. PRODUKT
-    ###### a) Vyhledání 3. produktu                           
-    products = page.locator(".product-image-wrapper")   # CSS lokátor pro seznam všech karet v gridu / mřížce, tzn. karty všech produktů na stránce
-    product_3 = products.nth(2)                         # proměnná pro určení pozice karty 3. produktu v mřížce
-    product_3.hover()
-    
-    ###### b) Kliknutí na tlačítko 'Add to Cart'
-    add_to_cart_prod3_btn = page. locator(".overlay-content > .btn").nth(2)  # lokátor pro tlačítko 'Add to cart' u 3. produktu s krycí vrstvou
-    add_to_cart_prod3_btn.click()                                            # kliknutí na 'Add to cart', tzn. přidání 3. produktu do košíku
-
-    ###### c) Kliknutí na tlačítko 'Continue Shopping'
-    continue_shop_btn = page.get_by_role("button", name="Continue Shopping") # lokátor tlačítka 'Continue Shopping'
-    continue_shop_btn.click()                                                # kliknutí na tlačítko
+    # 4. Click 'Signup / Login' button
+    login_link = page.get_by_role("link", name=" Signup / Login")   # vyhledání linku v záhlaví domovské stránky pro přihlášení uživatele
+    login_link.click()
 
 
-    ### 4. PRODUKT
-    ###### a) Vyhledání 4. produktu
-    product_4 = products.nth(3)                                              # proměnná pro určení pozice karty 3. produktu v mřížce
-    product_4.hover()
-
-    ###### b) Kliknutí na tlačítko 'Add to Cart'
-    add_to_cart_prod4_btn = page. locator(".overlay-content > .btn").nth(3)  # lokátor pro tlačítko 'Add to cart' u 4. produktu s krycí vrstvou
-    add_to_cart_prod4_btn.click()                                            # kliknutí na 'Add to cart', tzn. přidání 4. produktu do košíku
-
-    ###### c) Kliknutí na tlačítko 'Continue Shopping'
-    continue_shop_btn = page.get_by_role("button", name="Continue Shopping") # lokátor tlačítka 'Continue Shopping'
-    continue_shop_btn.click() 
-
-
-    # 5. Click 'Cart' button
-    cart_link = page.get_by_role("link", name=" Cart")                      # lokátor pro link Cart v záhlaví domovské stránky
-    cart_link.click()
-
-
-    # 6. Verify that cart page is displayed
-    ### a) Technické ověření přesměrování na stránku košíku (kontrola URL)
-    expect(page).to_have_url("https://automationexercise.com/view_cart")     
-    
-    ### b) Uživatelské ověření, že je skutečně zobrazen obsah nákupního košíku
-    shopping_cart_heading = page.get_by_text("Shopping Cart") # nebo s CSS lokátorem: shopping_cart_heading = page.locator("ol.breadcrumb li.active") 
-    expect(shopping_cart_heading).to_be_visible()             # nebo s CSS lokátorem: expect(shopping_cart_heading).to_have_text("Shopping Cart")                           
-    
-    
-    # 7. Click Proceed To Checkout
-    proceed_to_checkout_link = page.get_by_text("Proceed To Checkout")          # lokátor na link 'Proceed to Checkout'
-    proceed_to_checkout_link.click()                                            # kliknutí na link
-
-
-    # 8. Click 'Register / Login' button
-    reg_login_link = page.get_by_role("link", name="Register / Login")          # lokátor na link 'Register / Login'
-    reg_login_link.click()                                                      # kliknutí na link
-
-
-    # 9. Fill all details in Signup and create account
-    ### Kompletní registrace uživatele 'Test_14 User' určeného pouze pro tento test
-    ### Ukládání některých hodnot do proměnných, využijí se v kroku 14 při ověřování adres
-
-    ### a) Kontrola přesměrování na stránku pro registraci nového uživatele
+    # 5. Fill all details in Signup and create account
+    ### Kompletní registrace uživatele 'Test_15 User' určeného pouze pro tento test
+    ### Ukládání některých hodnot do proměnných, využijí se v kroku 12 při ověřování adres
+    ### a) Ověření přesměrování na stránku s nadpisem 'New User Signup!'
     new_user_heading = page.get_by_role("heading", name="New User Signup!")   # lokátor pro nadpis 'New User Signup!' na nové stránce
     expect(new_user_heading).to_be_visible(timeout=2000)  # ověření s automatizovaným čekáním, že se na stránce objevil cílený nadpis
 
     ### b) Vytvoření hlavičky uživatele (jméno, email)
-    name = "Test_14 User" # toto jméno se nedotahuje do adres+ v bodu f) se zadávají hodnoty do polí 'Firt Name', 'Last Name' a tyto hodnoty se dotahují do adres 
-    email = f"test_14_user_{uuid.uuid4().hex[:8]}@example.com" # dynamické vygenerování unikátního emailu
+    name = "Test_15 User" 
+    email = f"test_15_user_{uuid.uuid4().hex[:8]}@example.com" # dynamické vygenerování unikátního emailu
 
     name_input = page.get_by_role("textbox", name="Name")
     name_input.fill(name)
@@ -107,29 +50,29 @@ def test_order_reg_checkout(page: Page):
     expect(page.get_by_text("Enter Account Information")).to_be_visible()
 
     ### e) Vyplnění povinných údajů
-    title = page.locator("#id_gender2")                      # gender2 = Mrs. / Paní, dotahuje se do adres 
+    title = page.locator("#id_gender1")                      # gender1 = Mr. / pán
     title.check()                                    
 
     pswd = "TestPassword123"                                    
     pswd_input = page.get_by_role("textbox", name="Password *") 
     pswd_input.fill(pswd)                                       
 
-    ###### Datum narození: 8. srpna 1988
-    page.select_option("#days", "8")        
-    page.select_option("#months", "August")      
-    page.select_option("#years", "1988")     
+    ###### Datum narození: 31. prosince 1974
+    page.select_option("#days", "31")        
+    page.select_option("#months", "December")      
+    page.select_option("#years", "1974")     
 
     ###### Uložení hodnot do proměnných - dotahují se všechny do adres
-    first_name = "Test_14"                  
+    first_name = "Test_15"                  
     last_name = "User"                    
     company = "AutoTest"                    
-    address1 = "742 Market Street"      
-    address2 = "Apt. 333"         
-    state = "Pennsylvania"                       
-    city = "Philadelphia"                       
-    zip_code = "19106"                      
-    mobile_num ="+12155550198"            
-
+    address1 = "815 Vine Street"
+    address2 = "Apt. 21"
+    state = "Ohio"
+    city = "Cincinnati"
+    zip_code = "45202"
+    mobile_num = "+15135550147"
+         
     ###### Lokátory
     first_name_input = page.get_by_role("textbox", name="First name *")                    
     last_name_input = page.get_by_role("textbox", name="Last name *")                  
@@ -160,28 +103,74 @@ def test_order_reg_checkout(page: Page):
     page.get_by_role("button", name="Create Account").click()
   
 
-    # 10. Verify 'ACCOUNT CREATED!' and click 'Continue' button
+    # 6. Verify 'ACCOUNT CREATED!' and click 'Continue' button
     ### Ověření, že se zobrazil nadpis 'ACCOUNT CREATED!'
     expect(page.get_by_text("Account Created!")).to_be_visible()   # ověření s automatizovaným čekáním, že se na stránce objevil cílený nadpis
     page.get_by_role("link", name="Continue").click()              # kliknutí na link 'Continue'
 
-
-    # 11. Verify ' Logged in as username' at top
-    logged_user_info = page.get_by_text(f"Logged in as {name}") # vyhledání linku v záhlaví stránky s textem o přihlášeném uživateli (proměnná 'name' z kroku 9 b)
+   
+    # 7. Verify ' Logged in as username' at top
+    logged_user_info = page.get_by_text(f"Logged in as {name}") # vyhledání linku v záhlaví stránky s textem o přihlášeném uživateli (proměnná 'name' z kroku 5 b)
     expect(logged_user_info).to_be_visible()
 
 
-    # 12. Click 'Cart' button
-    cart_link = page.get_by_role("link", name=" Cart") # lokátor na link 'Cart' (Nákupní košík) v záhlaví domovské stránky
-    cart_link.click()                                   # kliknutí na link              
+    # 8. Add products to cart
+    ### Přidání produktu č. 6 a 7 do nákupního košíku.
+    ### Seznam produktů je na stránce reprezentovaný gridem / mřížkou karet produktů;
+    ### každý produkt = jedna karta (v gridu / mřížce)
+    ### všechny karty mají stejnou třídu <div class="product-image-wrapper">...</div>
+    ### 6. karta / produkt: .product-image-wrapper.nth(5)
+    ### 7. karta / produkt: .product-image-wrapper.nth(6)
+
+    ### 6. PRODUKT
+    ###### a) Vyhledání 6. produktu          
+    products = page.locator(".product-image-wrapper")   # CSS lokátor pro seznam všech karet v gridu / mřížce, tzn. karty všech produktů na stránce
+    product_6 = products.nth(5)                         # proměnná pro určení pozice karty 6. produktu v mřížce
+    product_6.hover()
+    
+    ###### b) Kliknutí na tlačítko 'Add to Cart'
+    add_to_cart_prod6_btn = page. locator(".overlay-content > .btn").nth(5)  # lokátor pro tlačítko 'Add to cart' u 6. produktu s krycí vrstvou
+    add_to_cart_prod6_btn.click()                                            # kliknutí na 'Add to cart', tzn. přidání 6. produktu do košíku
+
+    ###### c) Kliknutí na tlačítko 'Continue Shopping'
+    continue_shop_btn = page.get_by_role("button", name="Continue Shopping") # lokátor tlačítka 'Continue Shopping'
+    continue_shop_btn.click()                                                # kliknutí na tlačítko
 
 
-    # 13. Click 'Proceed To Checkout' button
-    proceed_to_checkout_link = page.get_by_text("Proceed To Checkout") # lokátor na link 'Proceed to Checkout' ze stránky pro nákupní košík 
-    proceed_to_checkout_link.click()                                   # kliknutí na link
+    ### 7. PRODUKT
+    ###### a) Vyhledání 4. produktu
+    product_7 = products.nth(6)                                              # proměnná pro určení pozice karty 7. produktu v mřížce
+    product_7.hover()
+
+    ###### b) Kliknutí na tlačítko 'Add to Cart'
+    add_to_cart_prod7_btn = page. locator(".overlay-content > .btn").nth(6)  # lokátor pro tlačítko 'Add to cart' u 7. produktu s krycí vrstvou
+    add_to_cart_prod7_btn.click()                                            # kliknutí na 'Add to cart', tzn. přidání 7. produktu do košíku
+
+    ###### c) Kliknutí na tlačítko 'Continue Shopping'
+    continue_shop_btn = page.get_by_role("button", name="Continue Shopping") # lokátor tlačítka 'Continue Shopping'
+    continue_shop_btn.click() 
 
 
-    # 14. Verify Address Details and Review Your Order
+    # 9. Click 'Cart' button
+    cart_link = page.get_by_role("link", name=" Cart")                      # lokátor pro link Cart v záhlaví domovské stránky
+    cart_link.click()
+
+
+    # 10. Verify that cart page is displayed
+    ### a) Technické ověření přesměrování na stránku košíku (kontrola URL)
+    expect(page).to_have_url("https://automationexercise.com/view_cart")     
+    
+    ### b) Uživatelské ověření, že je skutečně zobrazen obsah nákupního košíku
+    shopping_cart_heading = page.get_by_text("Shopping Cart") 
+    expect(shopping_cart_heading).to_be_visible()                                      
+    
+
+    # 11. Click Proceed To Checkout
+    proceed_to_checkout_link = page.get_by_text("Proceed To Checkout")          # lokátor na link 'Proceed to Checkout'
+    proceed_to_checkout_link.click()                                            # kliknutí na link
+
+
+    # 12. Verify Address Details and Review Your Order
 
     ### a) Kontrola dodací a fakturační adresy
     ### Ověření přesměrování na stránku s nadpisem "Address Details"
@@ -194,7 +183,7 @@ def test_order_reg_checkout(page: Page):
 
     ### YOUR DELIVERY ADDRESS – ověření dodací adresy
     ### Ověřují se klíčové hodnoty zadané při registraci (ne formát ani pořadí řádků)
-    expect(delivery_block).to_contain_text("Mrs. Test_14 User")  # oslovení + celé jméno
+    expect(delivery_block).to_contain_text("Mr. Test_15 User")  # oslovení + celé jméno
     expect(delivery_block).to_contain_text(company)
     expect(delivery_block).to_contain_text(address1)
     expect(delivery_block).to_contain_text(address2)
@@ -206,7 +195,7 @@ def test_order_reg_checkout(page: Page):
 
     ### YOUR BILLING ADDRESS – ověření fakturační adresy
     ### Musí obsahovat stejné údaje jako dodací adresa
-    expect(billing_block).to_contain_text("Mrs. Test_14 User")
+    expect(billing_block).to_contain_text("Mr. Test_15 User")
     expect(billing_block).to_contain_text(company)
     expect(billing_block).to_contain_text(address1)
     expect(billing_block).to_contain_text(address2)
@@ -224,43 +213,23 @@ def test_order_reg_checkout(page: Page):
     review_your_order_heading = page.get_by_role("heading", name="Review Your Order")
     expect(review_your_order_heading).to_be_visible()
 
-    ### Kontrola pouze přítomnosti produktů 3 a 4, bez kontroly množství a cen (z důvodu hromadného spouštění testů)
-    ### Tabulka objednávky (obsahuje všechny řádky)
-    order_table = page.locator("#cart_info")                   # lokátor pro celou sekci objednávky (tabulku), element zahrnuje všechny řádky
-    expect(order_table).to_be_visible()
-
-    ### Ověření, že v objednávce jsou přítomny produkty 3 a 4
-    ### lokátor v sekci objednávky (tabulka)
-    product_3_row = order_table.locator("tr#product-3")  
-    product_4_row = order_table.locator("tr#product-4")
-
-    expect(product_3_row).to_be_visible()
-    expect(product_4_row).to_be_visible()
-
-
-    ### b) Kontrola nákupní objednávky
-
-    ### Ověření přesměrování na sekci s nadpisem "Review Your Order"
-    review_your_order_heading = page.get_by_role("heading", name="Review Your Order")
-    expect(review_your_order_heading).to_be_visible()
-
     ### Kontrola celé tabulky objednávky (sekce obsahující všechny položky objednávky)
-    order_table = page.locator("#cart_info")  
+    order_table = page.locator("#cart_info")                   
     expect(order_table).to_be_visible()
 
-    ### Kontrola pouze přítomnosti produktů 3 a 4 v objednávce
+    ### Kontrola pouze přítomnosti produktů 6 a 7 v objednávce
     ### (bez kontroly množství a cen z důvodu hromadného spuštění testů)
     ### Identifikace konkrétních produktů je provedena jako VNOŘENÝ LOKÁTOR 
     ### Lokátor řádku produktu je definován UVNITŘ lokátoru celé tabulky objednávky
-    product_3_row = order_table.locator("tr#product-3")   # lokátor pro řádek produktu 3 vnořený do lokátoru pro tabulku objednávky
-    product_4_row = order_table.locator("tr#product-4")   # lokátor pro řádek produktu 4 vnořený do lokátoru pro tabulku objednávky
+    product_6_row = order_table.locator("tr#product-6")   # lokátor pro řádek produktu 6 vnořený do lokátoru pro tabulku objednávky
+    product_7_row = order_table.locator("tr#product-7")   # lokátor pro řádek produktu 7 vnořený do lokátoru pro tabulku objednávky
 
     ### Ověření, že jsou oba produkty skutečně přítomny v objednávce
-    expect(product_3_row).to_be_visible()
-    expect(product_4_row).to_be_visible()
+    expect(product_6_row).to_be_visible()
+    expect(product_7_row).to_be_visible()
 
 
-    # 15. Enter description in comment text area and click 'Place Order'
+    # 13. Enter description in comment text area and click 'Place Order'
     comment_text_area = page.locator("textarea[name=\"message\"]")  # vložení komentáře do boxu s popisem "If you would like to add a comment ..."
     comment_text_area.fill("Test_14 User - test comment.")
 
@@ -268,7 +237,7 @@ def test_order_reg_checkout(page: Page):
     place_order_link.click()
 
 
-    # 16. Enter payment details: Name on Card, Card Number, CVC, Expiration date
+    # 14. Enter payment details: Name on Card, Card Number, CVC, Expiration date
     ### Uložení hodnot do proměnných
     name_on_card = "Test_14 User"
     card_number = "1111 2222 3333 4444"
@@ -289,24 +258,24 @@ def test_order_reg_checkout(page: Page):
     cvc_input.fill(cvc)
     mm_input.fill(mm)
     yyyy_input.fill(yyyy)
-
     
-    # 17. Click 'Pay and Confirm Order' button
+    
+    # 15. Click 'Pay and Confirm Order' button
     pay_and_confirm_btn = page.get_by_role("button", name="Pay and Confirm Order")
     pay_and_confirm_btn.click()
 
 
-    # 18. Verify success message 'Congratulations! Your order has been confirmed!'
+    # 16. Verify success message 'Your order has been placed successfully!'
     success_message = page.get_by_text("Congratulations! Your order")
     expect(success_message).to_be_visible()
 
 
-    # 19. Click 'Delete Account' button
+    # 17. Click 'Delete Account' button
     delete_acc_link = page.get_by_role("link", name=" Delete Account") # lokátor na link 'Delete Account' v záhlaví stránky
     delete_acc_link.click()                                             # kliknutí na link
 
 
-    # 20. Verify 'ACCOUNT DELETED!' and click 'Continue' button
+    # 18. Verify 'ACCOUNT DELETED!' and click 'Continue' button
     account_deleted_message = page.get_by_text("Account Deleted!")           # vyhledání hlášky 'Account Deleted'
     expect(account_deleted_message).to_be_visible # ověření s automatizovaným čekáním, že se na stránce objevil cílený text
 

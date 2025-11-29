@@ -4,7 +4,7 @@ Automatizované UI testy pro demo e‑shop https://automationexercise.com/ pomoc
 > Projekt je aktuálně v aktivním vývoji (work in progress).
 
 **Autor:**                      Jana Staňková  
-**Verze projektu:**             0.5.4 
+**Verze projektu:**             0.5.5 
 **Datum vytvoření:**            11. 11. 2025  
 **Datum poslední aktualizace:** 29. 11. 2025 
 **Python:**                     3.10+  
@@ -47,7 +47,8 @@ PyTest_006_Playwright_AutomationExercise/
 │   ├── test_11_pw_subsribe_cart_footer.py
 │   ├── test_12_pw_product_cart.py
 │   ├── test_13_pw_product_qty.py
-│   ├── test_14_pw_order_reg_checkout.py
+│   ├── test_14_pw_order_reg_while_checkout.py
+│   ├── test_15_pw_order_reg_before_checkout.py
 │   └── test_files/
 │       └── Sample.docx                      příloha pro test 'test_06_pw_contact_file_alert.py'
 ├── .gitignore
@@ -128,11 +129,18 @@ Projekt pracuje se třemi typy testovacích uživatelů:
 - Slouží výhradně pro **Test Case 1**
 
 ### 4. **Test_14 User**
-- Uživatelský účet je vytvořen **přímo v testu** `test_order_reg_checkout` (`test_14_pw_order_reg_checkout.py`)
+- Uživatelský účet je vytvořen **přímo v testu** `test_order_reg_while_checkout` (`test_14_pw_order_reg_while_checkout.py`)
 - Email je **dynamicky generován**
 - Uživatel je **na konci testu smazán v rámci testu**
 - Nepoužívá žádnou fixture
 - Slouží výhradně pro **Test Case 14**
+
+### 5. **Test_15 User**
+- Uživatelský účet je vytvořen **přímo v testu** `test_order_reg_before_checkout` (`test_15_pw_order_reg_before_checkout.py`)
+- Email je **dynamicky generován**
+- Uživatel je **na konci testu smazán v rámci testu**
+- Nepoužívá žádnou fixture
+- Slouží výhradně pro **Test Case 15**
 
 ---
 
