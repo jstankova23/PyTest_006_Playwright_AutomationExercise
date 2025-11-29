@@ -4,9 +4,9 @@ Automatizované UI testy pro demo e‑shop https://automationexercise.com/ pomoc
 > Projekt je aktuálně v aktivním vývoji (work in progress).
 
 **Autor:**                      Jana Staňková  
-**Verze projektu:**             0.4.3 
+**Verze projektu:**             0.5.4 
 **Datum vytvoření:**            11. 11. 2025  
-**Datum poslední aktualizace:** 27. 11. 2025 
+**Datum poslední aktualizace:** 29. 11. 2025 
 **Python:**                     3.10+  
 **Licence:**                    MIT  
 

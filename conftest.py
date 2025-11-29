@@ -3,9 +3,9 @@
 FIXTURES PRO TESTOVÁNÍ DEMO E-SHOP WEBU (PLAYWRIGHT + PYTEST)
 =============================================================================================================================
 Autor:                      Jana Staňková
-Verze projektu:             0.4.3
+Verze projektu:             0.5.4
 Datum vytvoření:            11. 11. 2025  
-Datum poslední aktualizace: 27. 11. 2025  
+Datum poslední aktualizace: 29. 11. 2025  
 
 # Popis:
 Projekt zahrnuje dvě fixture, které jsou automaticky spuštěny hned na začátku testu pro celou session - fixture **'accept_gdpr'**
