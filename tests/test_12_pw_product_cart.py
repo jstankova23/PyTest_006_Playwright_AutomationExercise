@@ -20,38 +20,43 @@ def test_product_cart(page: Page):
     ### Seznam produktů je na stránce reprezentovaný gridem / mřížkou karet produktů;
     ### každý produkt = jedna karta (v gridu / mřížce)
     ### všechny karty mají stejnou třídu <div class="product-image-wrapper">...</div>
-    ### 1. karta / produkt: .product-image-wrapper.first nebo .product-image-wrapper.nth(0)
-    ### 2. karta / produkt: .product-image-wrapper.nth(1)
-    ### 3. karta / produkt: .product-image-wrapper.nth(2)
-    ### poslední karta / produkt: .product-image-wrapper.last
     products = page.locator(".product-image-wrapper")       # CSS lokátor pro seznam všech karet v gridu / mřížce, tzn. karty všech produktů na stránce
-    first_product = products.nth(0)                         # proměnná pro určení pozice karty 1. produktu v mřížce
 
-    expect(first_product).to_be_visible(timeout=1000)       # časová rezerva na vyobrazení karty 1. produktu na nové stránce
-    
-    first_product.hover()
+    ###### a) Vyhledání 1. produktu dle ID přes href v mřížce a hover
+    product_1 = products.filter(has=page.locator("a[data-product-id='1']")).first # vyhledání první karty produktu z mřížky (products), která obsahuje odkaz na detail produktu s daným ID
+    product_1.scroll_into_view_if_needed() # pokud je karta produktu mimo viditelnou část stránky, Playwright ji posune do zorného pole, overlay se často aktivuje jen na viditelné kartě
+    product_1.hover()                      # simulace najetí myší na kartu produktu, tím se zobrazí overlay vrstva (.product-overlay) a v ní tlačítko 'Add to cart'
 
-    add_to_cart_prod1_btn = page. locator(".overlay-content > .btn").nth(0)  # lokátor pro tlačítko 'Add to cart' u 1. produktu s krycí vrstvou
-    add_to_cart_prod1_btn.click()                                            # kliknutí na tlačítko 'Add to cart', tzn. přidání 1. produktu do košíku
+    ###### b) Kliknutí na tlačítko 'Add to Cart'
+    add_to_cart_prod1_btn = product_1.locator(".overlay-content .btn") # vyhledání tlačítka 'Add to Cart' v overlay vrstvě (vnořený lokátor) UVNITŘ TÉTO KONKRÉTNÍ KARTY produktu 
+    add_to_cart_prod1_btn.wait_for(state="visible") # vyčkání, až se overlay vrstva skutečně ukáže
+    add_to_cart_prod1_btn.click(force=True)         # kliknutí na tlačítko 'Add to Cart', i když ho dočasně něco překrývá, klik i při krátkém překrytí karty produktu
 
     # 6. Click 'Continue Shopping' button
-    continue_shop_btn = page.get_by_role("button", name="Continue Shopping")    # lokátor tlačítka 'Continue Shopping'
-    continue_shop_btn.click()                                                   # kliknutí na tlačítko
+    continue_shop_btn = page.get_by_role("button", name="Continue Shopping") # lokátor pro tlačítko 'Continue Shopping'
+    continue_shop_btn.wait_for(state="visible")                              # vyčkání na plné zobrazení modalu 
+    continue_shop_btn.click()                                                # kliknutí na tlačítko 'Continue Shopping' v modalu
+    page.wait_for_selector("button:has-text('Continue Shopping')", state="hidden")  # vyčkání na zavření modalu (skrytý stav modalu / tlačítka), pak teprve přejít na další produkt
 
     # 7. Hover over second product and click 'Add to cart'
-    second_product = products.nth(1)                         # proměnná pro určení pozice karty 2. produktu v mřížce
+    ###### a) Vyhledání 2. produktu dle ID přes href v gridu a hover
+    product_2 = products.filter(has=page.locator("a[href='/product_details/2']")).first  
+    product_2.scroll_into_view_if_needed()  
+    product_2.hover()
 
-    expect(second_product).to_be_visible(timeout=1000)       # časová rezerva na vyobrazení karty 2. produktu na nové stránce
+    ###### b) Kliknutí na tlačítko 'Add to Cart'
+    add_to_cart_prod7_btn = product_2.locator(".overlay-content .btn")
+    add_to_cart_prod7_btn.wait_for(state="visible") 
+    add_to_cart_prod7_btn.click(force=True)
     
-    second_product.hover()
 
-    add_to_cart_prod2_btn = page. locator(".overlay-content > .btn").nth(1)  # lokátor pro tlačítko 'Add to cart' u 2. produktu s krycí vrstvou
-    add_to_cart_prod2_btn.click()                                            # kliknutí na tlačítko 'Add to cart', tzn. přidání 2. produktu do košíku
-    
     # 8. Click 'View Cart' button
-    view_cart_link = page.get_by_role("link", name="View Cart")    # lokátor pro link 'View Cart' v zobrazeném oknu
-    view_cart_link.click()                                         # kliknutí na link 'View Cart'
-    
+    view_cart_link = page.get_by_role("link", name="View Cart")             # lokátor pro link 'View Cart' v zobrazeném modalu
+    view_cart_link.wait_for(state="visible")                                # vyčkání na plné zobrazení modalu 
+    view_cart_link.click()                                                  # kliknutí na link 'View Cart'
+    page.wait_for_selector("button:has-text('View Cart')", state="hidden")  # vyčkání na zavření modalu (skrytý stav modalu / tlačítka)
+
+
     # 9. Verify both products are added to Cart
     ### Lokátory pro řádky 1. a 2. produktu v nákupním košíku
     ### Každý řádek reprezentuje jeden konkrétní produkt a obsahuje:

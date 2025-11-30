@@ -24,8 +24,8 @@ def test_login_positive(page: Page, temp_user):
     expect(login_heading).to_be_visible(timeout=2000)  # ověření přesměrování na stránku s daným nadpisem a zpomalení
 
     # 6. Enter correct email address and password
-    email = temp_user["email"]                     # uložení uživatelského emailu do proměnné (z fixture 'temp_user')
-    passwd = temp_user["password"]                 # uložení uživatelského hesla do proměnné (z fixture 'temp_user')
+    email = temp_user["email"]      # uložení uživatelského emailu do proměnné (z fixture 'temp_user'z conftest.py), slovník temp_user, klíč email
+    passwd = temp_user["password"]  # uložení uživatelského hesla do proměnné (z fixture 'temp_user'z conftest.py), slovník temp_user, klíč email
 
     email_input = page.locator("form").filter(has_text="Login").get_by_placeholder("Email Address") # lokátor pole "Email Address"
     password_input = page.get_by_role("textbox", name="Password")   # lokátor pole "Password"
@@ -38,7 +38,7 @@ def test_login_positive(page: Page, temp_user):
     login_btn.click()                                     # kliknutí na tlačítko "Login"
 
     # 8. Verify that 'Logged in as username' is visible
-    logged_user_info = page.get_by_text(f"Logged in as") # vyhledání linku v záhlaví stránky s textem o přihlášeném uživateli (proměnná 'name' z kroku 6)
+    logged_user_info = page.get_by_text(f"Logged in as {temp_user["name"]}") # vyhledání linku v záhlaví stránky s textem o přihlášeném uživateli
     expect(logged_user_info).to_be_visible()
 
     # 9. Click 'Delete Account' button

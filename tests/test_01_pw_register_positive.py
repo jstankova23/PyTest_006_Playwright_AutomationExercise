@@ -3,7 +3,7 @@
 # testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases)
 
 from playwright.sync_api import Page, expect
-import uuid                                             # kvůli generování emailu v kroku 9
+import uuid                                             # kvůli generování emailu v kroku 6
 
 # 01_TEST CASE: Register User - Positive Test
 # REGISTRACE UŽIVATELE DO DEMO E-SHOP WEBU 'https://automationexercise.com/' 
@@ -52,8 +52,10 @@ def test_registration_positive(page: Page):
     expect(new_page_heading).to_be_visible(timeout=2000)  # ověření s automatizovaným čekáním, že se na stránce objevil cílený nadpis
 
     # 9. Fill details: Title, Name, Email, Password, Date of birth
-    title = page.locator("#id_gender2")                      # gender2 = Mrs. / paní 
-    title.check()  
+    ###### Oslovení a heslo                          
+    title_input = page.locator("#id_gender2")   # Mrs. / paní
+    title = "Mrs."
+    title_input.check()
 
     pswd = "TestPassword123"                                    # uložení hesla do proměnné
     pswd_input = page.get_by_role("textbox", name="Password *") # lokátor pole Password
@@ -76,14 +78,14 @@ def test_registration_positive(page: Page):
     ### Uložení hodnot pro adresu a telefon uživatele do proměnných
     first_name = "Test_1"                     
     last_name = "User"                  
-    company = "AutoTest"                    
-    address1 = "4520 Palm Breeze Lane"      
-    address2 = "Apt. 12B"         
-    state = "Florida"                       
-    city = "Sarasota"                       
-    zip_code = "34232"                      
-    mobile_num ="(941) 555-4827"            
-
+    company = "AutoTest"    
+    address1 = "15 Kowhai Street"
+    address2 = "Flat 2A"
+    state = "Auckland"
+    city = "Auckland"
+    zip_code = "1023"
+    mobile_num = "+64 21 456 789"
+       
     ### Lokátory 
     first_name_input = page.get_by_role("textbox", name="First name *")                    
     last_name_input = page.get_by_role("textbox", name="Last name *")                  
@@ -106,9 +108,10 @@ def test_registration_positive(page: Page):
     zip_code_input.fill(zip_code)                     
     mobile_num_input.fill(mobile_num)
     
-    ### Výběr z roletového menu v poli Country
+    ###### Výběr z roletového menu v poli Country
+    country = "New Zealand"                           # hodnota, která se dotahuje do adres
     country_dropdown = page.get_by_label("Country *")   # lokátor pole Country s roletovým menu
-    country_dropdown.select_option("United States")     # výběr konkrétní hodnoty z roletového menu
+    country_dropdown.select_option(country)             # výběr konkrétní hodnoty z roletového menu
 
     # 13. Click 'Create Account button'
     create_acc_btn = page.get_by_role("button", name="Create Account")

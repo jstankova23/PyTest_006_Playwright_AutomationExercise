@@ -4,9 +4,9 @@ Automatizované UI testy pro demo e‑shop https://automationexercise.com/ pomoc
 > Projekt je aktuálně v aktivním vývoji (work in progress).
 
 **Autor:**                      Jana Staňková  
-**Verze projektu:**             0.5.5 
+**Verze projektu:**             0.6.5 
 **Datum vytvoření:**            11. 11. 2025  
-**Datum poslední aktualizace:** 29. 11. 2025 
+**Datum poslední aktualizace:** 30. 11. 2025 
 **Python:**                     3.10+  
 **Licence:**                    MIT  
 
@@ -49,6 +49,7 @@ PyTest_006_Playwright_AutomationExercise/
 │   ├── test_13_pw_product_qty.py
 │   ├── test_14_pw_order_reg_while_checkout.py
 │   ├── test_15_pw_order_reg_before_checkout.py
+│   ├── test_16_pw_order_login_before_checkout.py
 │   └── test_files/
 │       └── Sample.docx                      příloha pro test 'test_06_pw_contact_file_alert.py'
 ├── .gitignore
@@ -112,14 +113,14 @@ Projekt pracuje se třemi typy testovacích uživatelů:
 - Email je **dynamicky generován**
 - Uživatel je **sdílen napříč celou testovací session**
 - Smazání probíhá **až po dokončení všech testů**
-- Používán pro testy, které vyžadují sdílené přihlášení
+- Používán pro testy, které vyžadují sdílené přihlášení  - **Test Cases 4, 5**
 
 ### 2. **Temp User**
 - Uživatel je vytvořen pomocí fixture **`temp_user`**
 - Email je **dynamicky generován**
 - Uživatel je **na konci každého testu smazán pomocí stejné fixture**
 - Životnost uživatele = **jeden konkrétní test**
-- Používán pro testy vyžadující izolovaného uživatele
+- Používán pro testy vyžadující izolovaného uživatele - **Test Cases 2, 16**
 
 ### 3. **Test_1 User**
 - Uživatelský účet je vytvořen **přímo v testu** `test_registration_positive` (`test_01_pw_register_positive.py`)
@@ -146,13 +147,13 @@ Projekt pracuje se třemi typy testovacích uživatelů:
 
 ### Přehledná tabulka uživatelů
 
-| Typ uživatele     | Email       | Vytváří                | Maže                   | Použití     |
-|-------------------|-------------|------------------------|------------------------|-------------|
-| **Session User**  | dynamický   | fixture `session_user` | fixture `session_user` | celý běh    |
-| **Temp User**     | dynamický   | fixture `temp_user`    | fixture `temp_user`    | per-test    |
-| **Test_1 User**   | dynamický   | samotný test           | samotný test           | jen TC01    |
-| **Test_14 User**  | dynamický   | samotný test           | samotný test           | jen TC14    |
-
+| Typ uživatele     | Email       | Vytváří                | Maže                   | Životnost | Použití    |
+|-------------------|-------------|------------------------|------------------------|-----------|------------|
+| **Session User**  | dynamický   | fixture `session_user` | fixture `session_user` | celý běh  | TC04, TC05 |
+| **Temp User**     | dynamický   | fixture `temp_user`    | fixture `temp_user`    | per-test  | TC02, TC16 |
+| **Test_1 User**   | dynamický   | samotný test           | samotný test           | per-test  | TC01       |
+| **Test_14 User**  | dynamický   | samotný test           | samotný test           | per-test  | TC14       |
+| **Test_15 User**  | dynamický   | samotný test           | samotný test           | per-test  | TC15       |
 ---
 
 ### Ošetření selhání registrace uživatele

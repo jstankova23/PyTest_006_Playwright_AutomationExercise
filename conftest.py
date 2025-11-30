@@ -3,9 +3,9 @@
 FIXTURES PRO TESTOVÁNÍ DEMO E-SHOP WEBU (PLAYWRIGHT + PYTEST)
 =============================================================================================================================
 Autor:                      Jana Staňková
-Verze projektu:             0.5.5
+Verze projektu:             0.6.5
 Datum vytvoření:            11. 11. 2025  
-Datum poslední aktualizace: 29. 11. 2025  
+Datum poslední aktualizace: 30. 11. 2025  
 
 # Popis:
 Projekt zahrnuje dvě fixture, které jsou automaticky spuštěny hned na začátku testu pro celou session - fixture **'accept_gdpr'**
@@ -128,6 +128,7 @@ def page(browser_context):
 
 
 # 4) FIXTURE PRO VYTVOŘENÍ DOČASNÉHO UŽIVATELE `Temp User`
+# fixture 'temp_user' vrací slovník s klíči: 'email', 'password', 'name'
 # fixture vyžaduje import uuid;
 # fixture vytvoří uživatele 'Temp User' s unikátním dynamicky generovaným emailem pro každý test, který má tuto fixture ve svém parametru;
 # po dokončení testu uživatele smaže, pokud ho nesmazal test
@@ -158,24 +159,51 @@ def temp_user(page: Page):
     expect(page.get_by_text("Enter Account Information")).to_be_visible()
 
     # Vyplnění povinných údajů
-    page.check("#id_gender2")                   # oslovení Mrs. / paní
+    ###### Oslovení a heslo                          
+    title_input = page.locator("#id_gender2")   # Mrs. / paní
+    title = "Mrs."
+    title_input.check()
+
     page.fill("#password", password)
+
+    ###### Datum narození: 10. května 1990
     page.select_option("#days", "10")
     page.select_option("#months", "5")
     page.select_option("#years", "1990")
-    page.fill("#first_name", "Temp")
-    page.fill("#last_name", "User")
-    # pole 'Company' nevyplňuje
-    page.fill("#address1", "123 Test Street")
-    # pole 'address2' nevyplňuje
-    page.fill("#state", "Florida")
-    page.fill("#city", "Sarasota")
-    page.fill("#zipcode", "34201")
-    page.fill("#mobile_number", "+19415550123")
+
+    ###### Uložení hodnot do proměnných - dotahují se všechny do adres
+    first_name = "Temp"                  
+    last_name = "User"                    
+    # pole 'Company' se u 'Temp User' nevyplňuje                  
+    address1 = "78 Harbour View Road"
+    # pole 'Address2' se u 'Temp User' nevyplňuje  
+    state = "New South Wales"
+    city = "Sydney"
+    zip_code = "2000"
+    mobile_num = "+61 412 345 678"
+
+    ###### Lokátory
+    first_name_input = page.get_by_role("textbox", name="First name *")                    
+    last_name_input = page.get_by_role("textbox", name="Last name *")                  
+    address1_input = page.get_by_role("textbox", name="Address * (Street address, P.")    
+    state_input = page.get_by_role("textbox", name="State *")                      
+    city_input = page.get_by_role("textbox", name="City * Zipcode *")                       
+    zip_code_input = page.locator("#zipcode")                      
+    mobile_num_input = page.get_by_role("textbox", name="Mobile Number *")     
+
+    ###### Vyplnění polí
+    first_name_input.fill(first_name)                    
+    last_name_input.fill(last_name)                
+    address1_input.fill(address1)  
+    state_input.fill(state)                     
+    city_input.fill(city)                      
+    zip_code_input.fill(zip_code)                     
+    mobile_num_input.fill(mobile_num)
 
     # Výběr hodnoty Country z roletového menu
-    country_dropdown = page.get_by_label("Country *")
-    country_dropdown.select_option("United States")
+    country = "Australia"                           # hodnota, která se dotahuje do adres
+    country_dropdown = page.get_by_label("Country *")   
+    country_dropdown.select_option(country)             
 
     # Dokončení registrace
     page.get_by_role("button", name="Create Account").click()
@@ -190,10 +218,21 @@ def temp_user(page: Page):
     # Vrácení stránky do defaultního stavu
     page.goto("https://automationexercise.com/")
 
-    # Vrácení údajů (email, heslo) testům
+    # Vrácení údajů testům
+    # fixture 'temp_user' vrací slovník s klíči: 'email', 'password', 'name' atd.
     yield {
-        "email": email,
-        "password": password,
+        "email": email,            # použito pro login
+        "password": password,      # použito pro login
+        "name": name,              # použito pro ověření textu „Logged in as username“ v záhlaví
+        "title": title,
+        "first_name": first_name,
+        "last_name": last_name, 
+        "address1": address1,                 
+        "state": state,
+        "city": city,
+        "zip_code": zip_code,
+        "mobile_num": mobile_num,
+        "country": country,                
     }
 
     # Cleanup – pokud test nezmazal uživatele, smaže ho fixture, mazání dočasného uživatele po každém testu
@@ -204,6 +243,7 @@ def temp_user(page: Page):
 
 
 # 5) FIXTURE PRO VYTVOŘENÍ JEDNOHO UŽIVATELE `Session User` PRO CELOU TESTOVACÍ SESSION
+# fixture 'session_user' vrací slovník s klíči: 'email', 'password', 'name'
 # fixture vyžaduje import uuid;
 # 'autouse=True' zajistí, že se daná fixture spustí automaticky před prvním testem;
 # fixture 'session_user' vytvoří uživatele 'Session User'pro celou statickou session, 
@@ -237,24 +277,51 @@ def session_user(browser_context):
     expect(page.get_by_text("Enter Account Information")).to_be_visible()
 
     # Vyplnění povinných údajů
-    page.check("#id_gender1")                   # oslovení Mr. / pán
-    page.fill("#password", password)
-    page.select_option("#days", "10")
-    page.select_option("#months", "5")
-    page.select_option("#years", "1990")
-    page.fill("#first_name", "Session")
-    page.fill("#last_name", "User")
-    # pole 'Company' nevyplňuje
-    page.fill("#address1", "123 Test Street")
-    # pole 'address2' nevyplňuje
-    page.fill("#state", "Florida")
-    page.fill("#city", "Sarasota")
-    page.fill("#zipcode", "34201")
-    page.fill("#mobile_number", "+19415550123")
+    ###### Oslovení a heslo                          
+    title_input = page.locator("#id_gender1")   # oslovení Mr. / pan
+    title = "Mrs."
+    title_input.check()
 
-    # Výběr hodnoty Country z roletového menu
-    country_dropdown = page.get_by_label("Country *")
-    country_dropdown.select_option("United States")
+    page.fill("#password", password)
+
+     ###### Datum narození: 23. listopadu 1979
+    page.select_option("#days", "23")
+    page.select_option("#months", "11")
+    page.select_option("#years", "1979")
+
+    ###### Uložení hodnot do proměnných - dotahují se všechny do adres
+    first_name = "Session"                  
+    last_name = "User"                    
+    # pole 'Company' se u 'Session User' nevyplňuje                  
+    address1 = "123 Test Street"      
+    # pole 'Address2' se u 'Session User' nevyplňuje     
+    state = "Florida"                       
+    city = "Sarasota"                       
+    zip_code = "34201"                      
+    mobile_num ="+19415550123"    
+
+    ###### Lokátory
+    first_name_input = page.get_by_role("textbox", name="First name *")                    
+    last_name_input = page.get_by_role("textbox", name="Last name *")                  
+    address1_input = page.get_by_role("textbox", name="Address * (Street address, P.")    
+    state_input = page.get_by_role("textbox", name="State *")                      
+    city_input = page.get_by_role("textbox", name="City * Zipcode *")                       
+    zip_code_input = page.locator("#zipcode")                      
+    mobile_num_input = page.get_by_role("textbox", name="Mobile Number *")     
+
+    ###### Vyplnění polí
+    first_name_input.fill(first_name)                    
+    last_name_input.fill(last_name)                
+    address1_input.fill(address1)  
+    state_input.fill(state)                     
+    city_input.fill(city)                      
+    zip_code_input.fill(zip_code)                     
+    mobile_num_input.fill(mobile_num)
+
+    ###### Výběr z roletového menu v poli Country
+    country = "United States"                           
+    country_dropdown = page.get_by_label("Country *")   
+    country_dropdown.select_option(country)             
     
     # Dokončení registrace
     page.get_by_role("button", name="Create Account").click()
@@ -269,10 +336,21 @@ def session_user(browser_context):
     # Vrácení stránky do defaultního stavu
     page.goto("https://automationexercise.com/")
 
-    # Vrácení údajů (email, heslo) testům
+    # Vrácení údajů testům
+    # fixture 'session_user' vrací slovník s klíči: 'email', 'password', 'name' atd.
     yield {
-        "email": email,
-        "password": password,
+        "email": email,            # použito pro login
+        "password": password,      # použito pro login
+        "name": name,              # použito pro ověření textu „Logged in as username“ v záhlaví
+        "title": title,
+        "first_name": first_name,
+        "last_name": last_name, 
+        "address1": address1,                 
+        "state": state,
+        "city": city,
+        "zip_code": zip_code,
+        "mobile_num": mobile_num,
+        "country": country,                
     }
 
     # Cleanup – smazání uživatele po doběhnutí všech testů v session

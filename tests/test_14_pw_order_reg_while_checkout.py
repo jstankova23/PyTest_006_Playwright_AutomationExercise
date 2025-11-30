@@ -3,7 +3,7 @@
 # testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases)
 
 from playwright.sync_api import Page, expect
-import uuid                                             # kvůli generování emailu v kroku 9
+import uuid                                             # kvůli generování emailu v kroku 9 b)
 
 # 14: Place Order: Register while Checkout
 # TEST: OOBJEDNÁVKA 3. A 4. PRODUKTU S REGISTRACÍ UŽIVATELE 'Test_14 User' PŘI DOKONČENÍ OBJEDNÁVKY, PLATBA A SMAZÁNÍ UŽIVATELE
@@ -16,40 +16,46 @@ def test_order_reg_checkout(page: Page):
     
 
     # 4. Add products to cart
-    ### Přidání produktu č. 3 a 4 do nákupního košíku.
+    ### Přidání 3. a 4. produktu dle pořadí zobrazení na stránce do košíku, identifikace konkrétních produktů probíhá ale podle jejich ID v DOM (ID neodpovídá vždy pořadí na stránce).   
     ### Seznam produktů je na stránce reprezentovaný gridem / mřížkou karet produktů;
     ### každý produkt = jedna karta (v gridu / mřížce)
     ### všechny karty mají stejnou třídu <div class="product-image-wrapper">...</div>
-    ### 3. karta / produkt: .product-image-wrapper.nth(2)
-    ### 4. karta / produkt: .product-image-wrapper.nth(3)
-
-    ### 3. PRODUKT
-    ###### a) Vyhledání 3. produktu                           
     products = page.locator(".product-image-wrapper")   # CSS lokátor pro seznam všech karet v gridu / mřížce, tzn. karty všech produktů na stránce
-    product_3 = products.nth(2)                         # proměnná pro určení pozice karty 3. produktu v mřížce
-    product_3.hover()
-    
+
+    ### Přidání 3. produktu do košíku
+    ###### a) Vyhledání 3. produktu dle ID přes href v mřížce a hover
+    product_3 = products.filter(has=page.locator("a[data-product-id='3']")).first # vyhledání první karty produktu z mřížky (products), která obsahuje odkaz na detail produktu s daným ID
+    product_3.scroll_into_view_if_needed() # pokud je karta produktu mimo viditelnou část stránky, Playwright ji posune do zorného pole, overlay se často aktivuje jen na viditelné kartě
+    product_3.hover()                      # simulace najetí myší na kartu produktu, tím se zobrazí overlay vrstva (.product-overlay) a v ní tlačítko 'Add to cart'
+
     ###### b) Kliknutí na tlačítko 'Add to Cart'
-    add_to_cart_prod3_btn = page. locator(".overlay-content > .btn").nth(2)  # lokátor pro tlačítko 'Add to cart' u 3. produktu s krycí vrstvou
-    add_to_cart_prod3_btn.click()                                            # kliknutí na 'Add to cart', tzn. přidání 3. produktu do košíku
+    add_to_cart_prod3_btn = product_3.locator(".overlay-content .btn") # vyhledání tlačítka 'Add to Cart' v overlay vrstvě (vnořený lokátor) UVNITŘ TÉTO KONKRÉTNÍ KARTY produktu 
+    add_to_cart_prod3_btn.wait_for(state="visible") # vyčkání, až se overlay vrstva skutečně ukáže
+    add_to_cart_prod3_btn.click(force=True)         # kliknutí na tlačítko 'Add to Cart', i když ho dočasně něco překrývá, klik i při krátkém překrytí karty produktu
 
-    ###### c) Kliknutí na tlačítko 'Continue Shopping'
-    continue_shop_btn = page.get_by_role("button", name="Continue Shopping") # lokátor tlačítka 'Continue Shopping'
-    continue_shop_btn.click()                                                # kliknutí na tlačítko
+    ###### c) Kliknutí na tlačítko 'Continue Shopping' v modalu (popup / vyskakovací okno s tlačítkem 'Continue Shopping')
+    continue_shop_btn = page.get_by_role("button", name="Continue Shopping") # lokátor pro tlačítko 'Continue Shopping'
+    continue_shop_btn.wait_for(state="visible")                              # vyčkání na plné zobrazení modalu 
+    continue_shop_btn.click()                                                # kliknutí na tlačítko 'Continue Shopping' v modalu
+    page.wait_for_selector("button:has-text('Continue Shopping')", state="hidden")  # vyčkání na zavření modalu (skrytý stav modalu / tlačítka), pak teprve přejít na další produkt
 
 
-    ### 4. PRODUKT
-    ###### a) Vyhledání 4. produktu
-    product_4 = products.nth(3)                                              # proměnná pro určení pozice karty 3. produktu v mřížce
+    ### Přidání 4. produktu do košíku
+    ###### a) Vyhledání 4. produktu dle ID přes href v gridu a hover
+    product_4 = products.filter(has=page.locator("a[href='/product_details/4']")).first  
+    product_4.scroll_into_view_if_needed()  
     product_4.hover()
 
     ###### b) Kliknutí na tlačítko 'Add to Cart'
-    add_to_cart_prod4_btn = page. locator(".overlay-content > .btn").nth(3)  # lokátor pro tlačítko 'Add to cart' u 4. produktu s krycí vrstvou
-    add_to_cart_prod4_btn.click()                                            # kliknutí na 'Add to cart', tzn. přidání 4. produktu do košíku
+    add_to_cart_prod4_btn = product_4.locator(".overlay-content .btn")
+    add_to_cart_prod4_btn.wait_for(state="visible") 
+    add_to_cart_prod4_btn.click(force=True)
 
     ###### c) Kliknutí na tlačítko 'Continue Shopping'
-    continue_shop_btn = page.get_by_role("button", name="Continue Shopping") # lokátor tlačítka 'Continue Shopping'
-    continue_shop_btn.click() 
+    continue_shop_btn = page.get_by_role("button", name="Continue Shopping")
+    continue_shop_btn.wait_for(state="visible") 
+    continue_shop_btn.click()
+    page.wait_for_selector("button:has-text('Continue Shopping')", state="hidden")
 
 
     # 5. Click 'Cart' button
@@ -108,8 +114,10 @@ def test_order_reg_checkout(page: Page):
     expect(page.get_by_text("Enter Account Information")).to_be_visible()
 
     ### e) Vyplnění povinných údajů
-    title = page.locator("#id_gender2")                      # gender2 = Mrs. / Paní, dotahuje se do adres 
-    title.check()                                    
+    ###### Oslovení a heslo                          
+    title_input = page.locator("#id_gender2")   # Mrs. / paní
+    title = "Mrs."
+    title_input.check()
 
     pswd = "TestPassword123"                                    
     pswd_input = page.get_by_role("textbox", name="Password *") 
@@ -153,9 +161,11 @@ def test_order_reg_checkout(page: Page):
     zip_code_input.fill(zip_code)                     
     mobile_num_input.fill(mobile_num)
 
-    ###### Výběr z roletového menu v poli Country - dotahuje se do adres
+    ###### Výběr z roletového menu v poli Country
+    country = "United States"                           # hodnota, která se dotahuje do adres
     country_dropdown = page.get_by_label("Country *")   # lokátor pole Country s roletovým menu
-    country_dropdown.select_option("United States")     # výběr konkrétní hodnoty z roletového menu
+    country_dropdown.select_option(country)             # výběr konkrétní hodnoty z roletového menu
+
 
     ### f) Dokončení registrace
     page.get_by_role("button", name="Create Account").click()
@@ -183,45 +193,74 @@ def test_order_reg_checkout(page: Page):
 
 
     # 14. Verify Address Details and Review Your Order
-
     ### a) Kontrola dodací a fakturační adresy
-    ### Ověření přesměrování na stránku s nadpisem "Address Details"
+    ##### Porovnávají se údaje zadané při registraci uživatele 'Test_15 User' (proměnné definované přímo v tomto testu) proti údajům zobrazeným v adresách objednávky v UI.
+    ##### Demo aplikace aktuálně neumožňuje zadat rozdílnou dodací a fakturační adresu, proto jsou v tuto chvíli obě adresy shodné.
+    ##### Přesto se obě vždy porovnávají proti registračním údajům daného uživatele.
+    ##### Porovnání adres pracuje i s prázdnými hodnotami – validují se pouze vyplněná pole.
+
+    ##### Ověření přesměrování na stránku s nadpisem "Address Details"
     address_details_heading = page.get_by_role("heading", name="Address Details")
     expect(address_details_heading).to_be_visible()
 
-    ### Bloky adres pro dodání zboží a fakturaci
+    ##### Bloky adres pro dodání zboží a fakturaci
     delivery_block = page.locator("#address_delivery")
     billing_block = page.locator("#address_invoice")
 
+    ##### Společný seznam polí pro dodací i fakturační adresu
+    ##### Definice klíčů, která pole se mají porovnávat (JEN NÁZVY POLÍ, ne jejich hodnoty)
+    address_fields = [
+        "company",
+        "address1",
+        "address2",
+        "city",
+        "state",
+        "zip_code",
+        "country",
+        "mobile_num"
+    ]
+
+    ##### Sestavení dat uživatele z proměnných definovaných v testu
+    ##### Definice slovníku s hodnotami, jaké konkrétní HODNOTY má každý klíč v tomto testu
+    ##### Slovnik - ruční mapování mezi názvy polí a skutečnými hodnotami uloženými v proměnných, aby mohl fungovat for cyklus
+    ##### V testech, kde je uživatel vytvořen pomocí fixture mi tento slovník vrací přímo sama fixture (yield) a není nutný pak tento krok v testu
+    test_user_data = {
+        "company": company,
+        "address1": address1,
+        "address2": address2,
+        "city": city,
+        "state": state,
+        "zip_code": zip_code,
+        "country": country,          
+        "mobile_num": mobile_num
+    }
+
     ### YOUR DELIVERY ADDRESS – ověření dodací adresy
-    ### Ověřují se klíčové hodnoty zadané při registraci (ne formát ani pořadí řádků)
-    expect(delivery_block).to_contain_text("Mrs. Test_14 User")  # oslovení + celé jméno
-    expect(delivery_block).to_contain_text(company)
-    expect(delivery_block).to_contain_text(address1)
-    expect(delivery_block).to_contain_text(address2)
-    expect(delivery_block).to_contain_text(city)
-    expect(delivery_block).to_contain_text(state)
-    expect(delivery_block).to_contain_text(zip_code)
-    expect(delivery_block).to_contain_text("United States")
-    expect(delivery_block).to_contain_text(mobile_num)
+    ##### Ověřují se klíčové hodnoty zadané při registraci (ne formát ani pořadí řádků)
+    title_full_name = f"{title} {first_name} {last_name}"   # 1. řádek adresy: oslovení (Mr./Mrs.) + celé jméno, proměnnou využívají obě adresy
+    expect(delivery_block).to_contain_text(title_full_name)
+
+    ##### For cyklus projde všechna definovaná pole adresy a ověří jejich přítomnost pouze v případě, že má uživatel dané pole skutečně vyplněno
+    for field in address_fields:
+        value = test_user_data.get(field)     # hodnota z registrace uživatele v rámci tohoto testu
+        if value:                             # pokud hodnota existuje
+            assert value in delivery_block.inner_text(), \
+                f"Delivery address validation failed for field '{field}': '{value}' not found in delivery address."
+
 
     ### YOUR BILLING ADDRESS – ověření fakturační adresy
-    ### Musí obsahovat stejné údaje jako dodací adresa
-    expect(billing_block).to_contain_text("Mrs. Test_14 User")
-    expect(billing_block).to_contain_text(company)
-    expect(billing_block).to_contain_text(address1)
-    expect(billing_block).to_contain_text(address2)
-    expect(billing_block).to_contain_text(city)
-    expect(billing_block).to_contain_text(state)
-    expect(billing_block).to_contain_text(zip_code)
-    expect(billing_block).to_contain_text("United States")
-    expect(billing_block).to_contain_text(mobile_num)
+    ##### Stejné porovnání jako u dodací adresy (aktuálně demo web má vždy obě adresy shodné)
+    expect(billing_block).to_contain_text(title_full_name)
+
+    for field in address_fields:
+        value = test_user_data.get(field)
+        if value:
+            assert value in billing_block.inner_text(), \
+                f"Billing address validation failed for field '{field}': '{value}' not found in billing address."
 
 
     ### b) Kontrola nákupní objednávky
     ### Ověření přesměrování na stránku s nadpisem "Review Your Order"
-    ### review_your_order_heading = page.get_by_role("heading", name="Review Your Order")
-    ### expect(review_your_order_heading).to_be_visible()
     review_your_order_heading = page.get_by_role("heading", name="Review Your Order")
     expect(review_your_order_heading).to_be_visible()
 
@@ -242,7 +281,8 @@ def test_order_reg_checkout(page: Page):
 
 
     # 15. Enter description in comment text area and click 'Place Order'
-    comment_text_area = page.locator("textarea[name=\"message\"]")  # vložení komentáře do boxu s popisem "If you would like to add a comment ..."
+    ### Vložení komentáře do boxu s popisem "If you would like to add a comment ..."
+    comment_text_area = page.locator("textarea[name=\"message\"]")  
     comment_text_area.fill("Test_14 User - test comment.")
 
     place_order_link = page.get_by_role("link", name="Place Order")
