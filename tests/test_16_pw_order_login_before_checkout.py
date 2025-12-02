@@ -1,14 +1,14 @@
 # Sada automatizovaných testů (pytest) na demo e-shop webu 'https://automationexercise.com/'
-# testy volají fixtures 'page', 'browser_context', 'accept_gdpr' definované v souboru conftest.py;
+# testy volají fixtures definované v souboru conftest.py;
 # testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases)
 
 from playwright.sync_api import Page, expect
 
 # 16: Place Order: Login before Checkout
-# TEST: LOGIN UŽIVATELE 'TEMP USER', OBJEDNÁNÍ 8., 9. A 10. PRODUKTU, PLATBA A SMAZÁNÍ UŽIVATELE
-### Fixture 'temp_user' vytvoří dočasného uživatele s dynamickou adresou pouze pro tento test a i když tento test uživatele maže, 
-### fixture zajišťuje jeho výmaz pro případ, kdyby tento test nedoběhl do konce.
-def test_order_login_before_checkout(page: Page, temp_user): # fixture 'temp_user' vytvoří dočasného uživatele pouze pro tento test
+# TEST: LOGIN UŽIVATELE 'TEST_16 USER', OBJEDNÁNÍ 8., 9. A 10. PRODUKTU, PLATBA A SMAZÁNÍ UŽIVATELE
+### Fixture 'test_16_user' vytvoří dočasného uživatele s dynamickou adresou pouze pro tento test a i když tento test uživatele maže, 
+### Fixture zajišťuje jeho výmaz pro případ, kdyby tento test nedoběhl do konce.
+def test_order_login_before_checkout(page: Page, test_16_user): # fixture 'test_16_user' vytvoří dočasného uživatele pouze pro tento test
     # 1. Launch browser; 
     # 2. Navigate to home url;
     # 3. Verify that home page is visible successfully
@@ -26,9 +26,9 @@ def test_order_login_before_checkout(page: Page, temp_user): # fixture 'temp_use
     login_heading = page.get_by_role("heading", name="Login to your account")  
     expect(login_heading).to_be_visible(timeout=2000)  
 
-    ### Zadání emailu a hesla uživatele 'Temp User', vytvořeného pomocí fixture 'temp_user' pro tento test
-    email = temp_user["email"]                     
-    passwd = temp_user["password"]                 
+    ### Zadání emailu a hesla uživatele 'Test_16 User', vytvořeného pomocí fixture 'test_16_user' pro tento test
+    email = test_16_user["email"]                     
+    passwd = test_16_user["password"]                 
 
     email_input = page.locator("form").filter(has_text="Login").get_by_placeholder("Email Address") 
     password_input = page.get_by_role("textbox", name="Password")                                   
@@ -42,7 +42,7 @@ def test_order_login_before_checkout(page: Page, temp_user): # fixture 'temp_use
 
 
     # 6. Verify ' Logged in as username' at top
-    logged_user_info = page.get_by_text(f"Logged in as {temp_user["name"]}") # vyhledání linku v záhlaví stránky s textem o přihlášeném uživateli
+    logged_user_info = page.get_by_text(f"Logged in as {test_16_user["name"]}") # vyhledání linku v záhlaví stránky s textem o přihlášeném uživateli
     expect(logged_user_info).to_be_visible()
 
 
@@ -60,12 +60,12 @@ def test_order_login_before_checkout(page: Page, temp_user): # fixture 'temp_use
     product_8.scroll_into_view_if_needed() # pokud je karta produktu mimo viditelnou část stránky, Playwright ji posune do zorného pole, overlay se často aktivuje jen na viditelné kartě
     product_8.hover()                      # simulace najetí myší na kartu produktu, tím se zobrazí overlay vrstva (.product-overlay) a v ní tlačítko 'Add to cart'
 
-    ###### b) Kliknutí na tlačítko 'Add to Cart'
+    ###### b) Overlay vrstva: Kliknutí na tlačítko 'Add to Cart'
     add_to_cart_prod8_btn = product_8.locator(".overlay-content .btn") # vyhledání tlačítka 'Add to Cart' v overlay vrstvě (vnořený lokátor) UVNITŘ TÉTO KONKRÉTNÍ KARTY produktu 
     add_to_cart_prod8_btn.wait_for(state="visible") # vyčkání, až se overlay vrstva skutečně ukáže
     add_to_cart_prod8_btn.click(force=True)         # kliknutí na tlačítko 'Add to Cart', i když ho dočasně něco překrývá, klik i při krátkém překrytí karty produktu
 
-    ###### c) Kliknutí na tlačítko 'Continue Shopping' v modalu (popup / vyskakovací okno s tlačítkem 'Continue Shopping')
+    ###### c) Modal: Kliknutí na tlačítko 'Continue Shopping' v modalu (popup / vyskakovací okno s tlačítkem 'Continue Shopping')
     continue_shop_btn = page.get_by_role("button", name="Continue Shopping") # lokátor pro tlačítko 'Continue Shopping'
     continue_shop_btn.wait_for(state="visible")                              # vyčkání na plné zobrazení modalu 
     continue_shop_btn.click()                                                # kliknutí na tlačítko 'Continue Shopping' v modalu
@@ -78,12 +78,12 @@ def test_order_login_before_checkout(page: Page, temp_user): # fixture 'temp_use
     product_9.scroll_into_view_if_needed()  
     product_9.hover()
 
-    ###### b) Kliknutí na tlačítko 'Add to Cart'
+    ###### b) Overlay vrstva: Kliknutí na tlačítko 'Add to Cart'
     add_to_cart_prod9_btn = product_9.locator(".overlay-content .btn")
     add_to_cart_prod9_btn.wait_for(state="visible") 
     add_to_cart_prod9_btn.click(force=True)
 
-    ###### c) Kliknutí na tlačítko 'Continue Shopping'
+    ###### c) Modal: Kliknutí na tlačítko 'Continue Shopping'
     continue_shop_btn = page.get_by_role("button", name="Continue Shopping")
     continue_shop_btn.wait_for(state="visible") 
     continue_shop_btn.click()
@@ -96,12 +96,12 @@ def test_order_login_before_checkout(page: Page, temp_user): # fixture 'temp_use
     product_10.scroll_into_view_if_needed() 
     product_10.hover()
 
-    ###### b) Kliknutí na tlačítko 'Add to Cart'
+    ###### b) Overlay vrstva: Kliknutí na tlačítko 'Add to Cart'
     add_to_cart_prod10_btn = product_10.locator(".overlay-content .btn")
     add_to_cart_prod10_btn.wait_for(state="visible")
     add_to_cart_prod10_btn.click(force=True)
 
-    ###### c) Kliknutí na tlačítko 'Continue Shopping'
+    ###### c) Modal: Kliknutí na tlačítko 'Continue Shopping'
     continue_shop_btn = page.get_by_role("button", name="Continue Shopping")
     continue_shop_btn.wait_for(state="visible")
     continue_shop_btn.click()
@@ -130,7 +130,7 @@ def test_order_login_before_checkout(page: Page, temp_user): # fixture 'temp_use
 
     # 11. Verify Address Details and Review Your Order
     ### a) Kontrola dodací a fakturační adresy
-    ##### Porovnávají se údaje z registrace uživatele 'Temp User' (fixture 'temp_user') proti údajům zobrazeným v adresách objednávky v UI.
+    ##### Porovnávají se údaje z registrace uživatele 'Test_16 User' (fixture 'test_16_user') proti údajům zobrazeným v adresách objednávky v UI.
     ##### Demo aplikace aktuálně neumožňuje zadat rozdílnou dodací a fakturační adresu, proto jsou v tuto chvíli obě adresy vždy shodné.
     ##### Přesto se obě adresy vždy porovnávají proti registračním údajům daného uživatele.
     ##### Porovnání adres pracuje i s prázdnými hodnotami – validují se pouze vyplněná pole.
@@ -159,16 +159,16 @@ def test_order_login_before_checkout(page: Page, temp_user): # fixture 'temp_use
         "mobile_num"
     ]
 
-    ##### POROVNÁNÍ ÚDAJŮ Z REGISTRACE UŽIVATELE 'Temp User' VS. UI (INFO Z OBJEDNÁVKY)
+    ##### POROVNÁNÍ ÚDAJŮ Z REGISTRACE UŽIVATELE 'Test_16 User' VS. UI (INFO Z OBJEDNÁVKY)
 
     ######## YOUR DELIVERY ADDRESS – ověření dodací adresy
-    ######## Ověřují se klíčové hodnoty zadané při registraci uživatele 'Temp User' (ne formát ani pořadí řádků)
-    title_full_name = f'{temp_user["title"]} {temp_user["first_name"]} {temp_user["last_name"]}' # 1.řádek adresy: oslovení (Mr./Mrs.) + celé jméno, proměnnou využívají obě adresy
+    ######## Ověřují se klíčové hodnoty zadané při registraci uživatele 'Test_16 User' (ne formát ani pořadí řádků)
+    title_full_name = f'{test_16_user["title"]} {test_16_user["first_name"]} {test_16_user["last_name"]}' # 1.řádek adresy: oslovení (Mr./Mrs.) + celé jméno, proměnnou využívají obě adresy
     expect(delivery_block).to_contain_text(title_full_name)     # ověření, zda text složený z oslovení a celého jména existuje někde v bloku s dodací adresou
 
     ##### For cyklus projde všechna definiovaná pole adresy a ověří jejich přítomnost pouze v případě, že má uživatel dané pole skutečně vyplněno
     for field in address_fields:                              # Cyklus prochází seznam klíčů (address_fields),
-        value = temp_user.get(field)                          # pro každý klíč si vezme hodnotu z fixture 'temp_user' pro registraci uživatele 'Temp User',
+        value = test_16_user.get(field)                          # pro každý klíč si vezme hodnotu z fixture 'test_16_user' pro registraci uživatele 'Test_16 User',
         if value:                                             # pokud hodnota ve fixture existuje,
             assert value in delivery_block.inner_text(), f"Delivery address validation failed for field '{field}': '{value}' not found in delivery address."  
             # ověří, že se hodnota nachází v UI - v objednávce v textu bloku pro dodací adresu, jinak test spadne s popisem pole
@@ -178,7 +178,7 @@ def test_order_login_before_checkout(page: Page, temp_user): # fixture 'temp_use
     expect(billing_block).to_contain_text(title_full_name)
 
     for field in address_fields:
-        value = temp_user.get(field)
+        value = test_16_user.get(field)
         if value:
             assert value in billing_block.inner_text(), f"Billing address validation failed for field '{field}': '{value}' not found in billing address."  
 

@@ -1,5 +1,5 @@
 # Sada automatizovaných testů (pytest) na demo e-shop webu 'https://automationexercise.com/'
-# testy volají fixtures 'page', 'browser_context', 'accept_gdpr' definované v souboru conftest.py;
+# testy volají fixtures definované v souboru conftest.py;
 # testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases)
 
 from playwright.sync_api import Page, expect
@@ -36,7 +36,7 @@ def test_logout(page: Page, session_user):
     login_btn.click()                                     # kliknutí na tlačítko "Login"
 
     # 8. Verify that 'Logged in as username' is visible
-    logged_user_info = page.get_by_text(f"Logged in as") # vyhledání linku v záhlaví stránky s textem o přihlášeném uživateli (proměnná 'name' z kroku 6)
+    logged_user_info = page.get_by_text(f"Logged in as {session_user["name"]}") # vyhledání linku v záhlaví stránky s textem o přihlášeném uživateli (Logged in as Session User)
     expect(logged_user_info).to_be_visible()
 
     # 9. Click 'Logout' button

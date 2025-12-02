@@ -1,11 +1,11 @@
 # Sada automatizovaných testů (pytest) na demo e-shop webu 'https://automationexercise.com/'
-# testy volají fixtures 'page', 'browser_context', 'accept_gdpr' definované v souboru conftest.py;
+# testy volají fixtures definované v souboru conftest.py;
 # testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases)
 
 from playwright.sync_api import Page, expect
 
 # 13_TEST CASE: Verify Product quantity in Cart
-# TEST PŘIDÁNÍ 4 KUSŮ JAKÉHOKOLIV PRODUKTU DO NÁKUPNÍHO KOŠÍKU PŘÍMO Z DOMOVSKÉ STRÁNKY SE ZÁVĚREČNOU KONTROLOU SPRÁVNÉHO MNOŽSTVÍ V KOŠÍKU
+# TEST PŘIDÁNÍ 4 KUSŮ JAKÉHOKOLIV PRODUKTU DO NÁKUPNÍHO KOŠÍKU PŘÍMO Z DOMOVSKÉ STRÁNKY, BEZ PŘIHLÁŠENÍ UŽIVATELE, SE ZÁVĚREČNOU KONTROLOU SPRÁVNÉHO MNOŽSTVÍ V KOŠÍKU
 ### Test neobsahuje přechod na podstránku s produkty, testuje se vkládání produktů přímo z domovské stránky.
 def test_product_qty(page: Page):
     # 1. Launch browser; 

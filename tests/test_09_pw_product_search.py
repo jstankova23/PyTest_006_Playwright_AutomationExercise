@@ -1,5 +1,5 @@
 # Sada automatizovaných testů (pytest) na demo e-shop webu 'https://automationexercise.com/'
-# testy volají fixtures 'page', 'browser_context', 'accept_gdpr' definované v souboru conftest.py;
+# testy volají fixtures definované v souboru conftest.py;
 # testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases)
 
 from playwright.sync_api import Page, expect
@@ -21,7 +21,7 @@ def test_product_search(page: Page):
     all_products_heading = page.get_by_role("heading", name="All Products")   # lokátor pro nadpis 'ALL PRODUCTS' na nové stránce
     expect(all_products_heading).to_be_visible(timeout=5000) # ověření přesměrování na stránku s daným nadpisem a delší zpomalení (problém s heavy load na stránce)
 
-    # 6. Enter product name in search input and click search button
+    # 6. Enter product name (TOP) in search input and click search button
     ### test vyhledání všech produktů s klíčovým slovem 'top' zadaným do vyhledavače
     search_field = page.get_by_role("textbox", name="Search Product")
     searched_value = "top"              # s proměnnou 'searched_value' se pracuje v kroku 8

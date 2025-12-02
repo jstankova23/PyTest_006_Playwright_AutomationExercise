@@ -4,20 +4,33 @@ Automatizované UI testy pro demo e‑shop https://automationexercise.com/ pomoc
 > Projekt je aktuálně v aktivním vývoji (work in progress).
 
 **Autor:**                      Jana Staňková  
-**Verze projektu:**             0.6.5 
+**Verze projektu:**             0.7.5 
 **Datum vytvoření:**            11. 11. 2025  
-**Datum poslední aktualizace:** 30. 11. 2025 
+**Datum poslední aktualizace:** 2. 12. 2025 
 **Python:**                     3.10+  
 **Licence:**                    MIT  
 
 ---
 
 ## Popis projektu
-Tento projekt obsahuje sadu testů v Pythonu s využitím **pytest + Playwright** pro demo e‑shop 
+
+Tento projekt obsahuje automatizované UI testy pro demo e‑shop: https://automationexercise.com
+
+Tento projekt obsahuje sadu 26 testů v Pythonu s využitím **pytest + Playwright** pro demo e‑shop 
 [automationexercise.com](https://automationexercise.com/). 
 Testy následují oficiální [Test Cases](https://automationexercise.com/test_cases).
-Projekt obsahuje pozitivní a negativní testy registrace a přihlašování uživatele, komunikaci s e-shop webem přes kontaktní formulář s odesláním souboru v příloze, vyhledávání produktů, odběr novinek a práci s objednávkou a fakturou. 
+Projekt obsahuje pozitivní a negativní testy registrace uživatele, jeho přihlášení a odhlášení, komunikaci s e-shop webem přes kontaktní formulář s odesláním souboru v příloze, vyhledávání produktů, odběr novinek a veškerou manipulaci s objednávkou a fakturou. Testy pracují s produkty,
+které jsou na stránkách demo e-shopu koncipovány jako karty zabalené v do obalu (wrapper) v mřížce. Pro vložení produktu je nutný hover nad danou
+kartou produktu, což vyvolá překrývací overlay vrstvu s nabídkou tlačítek nutných k nákupu. Testy pracují i s modálními okny a JavaScript alertem.
 
+## PyTest + Playwright – AutomationExercise
+
+Testy jsou psány pomocí frameworků **Playwright** a **PyTest** a jsou
+navrženy s důrazem na:
+- plnou izolaci jednotlivých testů,
+- opakovatelnost běhu,
+- stabilitu při hromadném spouštění,
+- minimalizaci vzájemného ovlivňování testů.
 ---
 
 ## Technologie
@@ -26,6 +39,29 @@ Projekt obsahuje pozitivní a negativní testy registrace a přihlašování už
 - pytest
 - Playwright (sync API)
 - pytest‑playwright plugin
+
+---
+
+## GDPR a uložený stav prohlížeče
+
+Projekt využívá soubor **gdpr.json**, který obsahuje uložený stav prohlížeče (cookies + localStorage) po odsouhlasení GDPR a je uložen
+v kořenovém adresáři projektu.
+
+Tento stav je při spuštění každého testu načítán do nového browser contextu pomocí fixture `context_gdpr`.
+
+Díky tomu:
+- není nutné v jednotlivých testech řešit cookie lištu,
+- každý test začíná s jednotným výchozím stavem,
+- nedochází k flakiness způsobené modálními okny.
+
+---
+
+## Základní architektura běhu testů
+
+- **browser** – jeden sdílený proces Chromium pro celou testovací session (session scoped)
+- **context_gdpr** – nový izolovaný browser context pro každý test (function scoped),
+                     session-scoped uživatel 'Session User' si vytváří vlastní context
+- **page** – jedna konkrétní stránka (tab) v rámci daného browser contextu (function scoped)
 
 ---
 
@@ -50,10 +86,15 @@ PyTest_006_Playwright_AutomationExercise/
 │   ├── test_14_pw_order_reg_while_checkout.py
 │   ├── test_15_pw_order_reg_before_checkout.py
 │   ├── test_16_pw_order_login_before_checkout.py
+│   ├── test_17_pw_remove_product_cart.py
+│   ├── test_18_pw_filter_categories_home_page.py
+│   ├── test_19_pw_filter_brands_products_page.py
+│   ├── test_20_pw_login_after_cart.py
 │   └── test_files/
 │       └── Sample.docx                      příloha pro test 'test_06_pw_contact_file_alert.py'
 ├── .gitignore
 ├── conftest.py                              fixtures
+├── gdpr.json                                stav prohlížeče pro fixture 'context_gdpr'   
 ├── README.md
 └── requirements.txt
 
@@ -105,63 +146,41 @@ https://automationexercise.com/test_cases
 
 ## Strategie uživatelů v testech
 
-Architektura uživatelů je navržena tak, aby byla zajištěna **nezávislost jednotlivých testů**. Testy si vzájemně neovlivňují data a lze je spouštět opakovaně i paralelně.  
-Projekt pracuje se třemi typy testovacích uživatelů:
+Architektura uživatelů je navržena tak, aby byla zajištěna **nezávislost jednotlivých testů**. Testy si vzájemně neovlivňují data a je možné je spouštět **opakovaně i paralelně**.
 
-### 1. **Session User**
-- Uživatel je vytvořen pomocí fixture **`session_user`**
-- Email je **dynamicky generován**
-- Uživatel je **sdílen napříč celou testovací session**
-- Smazání probíhá **až po dokončení všech testů**
-- Používán pro testy, které vyžadují sdílené přihlášení  - **Test Cases 4, 5**
+Všichni uživatelé jsou vytvářeni s **dynamicky generovaným e-mailem** a po dokončení testů jsou mazáni. Výjimkou je uživatel **Session User**, který je mazán až na konci celé testovací session po doběhnutí všech testů. Ostatní uživatelé jsou mazáni vždy v rámci konkrétního testu, pro který byli vytvořeni.
 
-### 2. **Temp User**
-- Uživatel je vytvořen pomocí fixture **`temp_user`**
-- Email je **dynamicky generován**
-- Uživatel je **na konci každého testu smazán pomocí stejné fixture**
-- Životnost uživatele = **jeden konkrétní test**
-- Používán pro testy vyžadující izolovaného uživatele - **Test Cases 2, 16**
+Uživatel **Session User** je sdílen mezi testy TC04 a TC05, které samy nevytvářejí nového uživatele, ale vyžadují přihlášení již existujícího uživatele. Tyto testy tedy využívají společného uživatele, který je automaticky vytvořen na začátku testovací session (i při spuštění jednotlivého testu samostatně) a je odstraněn až po dokončení celé session. Uživatel Session User má životnost celé testovací session (session scoped) 
+a používá tak session scoped fixture 'browser', ale nemůže používat function scoped fixture 'context_gdpr'. Z tohoto důvodu fixture 'session_user' vytváří pro tohoto uživatele vlastní kontext.
 
-### 3. **Test_1 User**
-- Uživatelský účet je vytvořen **přímo v testu** `test_registration_positive` (`test_01_pw_register_positive.py`)
-- Email je **dynamicky generován**
-- Uživatel je **na konci testu smazán v rámci testu**
-- Nepoužívá žádnou fixture
-- Slouží výhradně pro **Test Case 1**
-
-### 4. **Test_14 User**
-- Uživatelský účet je vytvořen **přímo v testu** `test_order_reg_while_checkout` (`test_14_pw_order_reg_while_checkout.py`)
-- Email je **dynamicky generován**
-- Uživatel je **na konci testu smazán v rámci testu**
-- Nepoužívá žádnou fixture
-- Slouží výhradně pro **Test Case 14**
-
-### 5. **Test_15 User**
-- Uživatelský účet je vytvořen **přímo v testu** `test_order_reg_before_checkout` (`test_15_pw_order_reg_before_checkout.py`)
-- Email je **dynamicky generován**
-- Uživatel je **na konci testu smazán v rámci testu**
-- Nepoužívá žádnou fixture
-- Slouží výhradně pro **Test Case 15**
+Ostatní uživatelé jsou **unikátní pro každý test**. Liší se pouze způsobem jejich vytvoření:
+- Testy, které mají v rámci scénáře zahrnutou registraci nového uživatele, si svého uživatele vytvářejí samy.
+- Testy, které registraci netestují, využívají **specifické fixtures definované v souboru `conftest.py`**.
 
 ---
 
 ### Přehledná tabulka uživatelů
 
-| Typ uživatele     | Email       | Vytváří                | Maže                   | Životnost | Použití    |
-|-------------------|-------------|------------------------|------------------------|-----------|------------|
-| **Session User**  | dynamický   | fixture `session_user` | fixture `session_user` | celý běh  | TC04, TC05 |
-| **Temp User**     | dynamický   | fixture `temp_user`    | fixture `temp_user`    | per-test  | TC02, TC16 |
-| **Test_1 User**   | dynamický   | samotný test           | samotný test           | per-test  | TC01       |
-| **Test_14 User**  | dynamický   | samotný test           | samotný test           | per-test  | TC14       |
-| **Test_15 User**  | dynamický   | samotný test           | samotný test           | per-test  | TC15       |
+| Typ uživatele    | Email     | Vytváří                | Maže           | Životnost | Použití    |
+|------------------|-----------|------------------------|----------------|-----------|------------|
+| **Session User** | dynamický | fixture `session_user` | fixture        | celý běh  | TC04, TC05 |
+| **Test 1 User**  | dynamický | samotný test           | test           | per-test  | TC01       |
+| **Test 2 User**  | dynamický | fixture `test_2_user`  | test / fixture | per-test  | TC02       |
+| **Test 14 User** | dynamický | test                   | test           | per-test  | TC14       |
+| **Test 15 User** | dynamický | test                   | test           | per-test  | TC15       |
+| **Test 16 User** | dynamický | fixture `test_16_user` | test           | per-test  | TC16       |
+| **Test 20 User** | dynamický | fixture `test_20_user` | test           | per-test  | TC20       |
+| **Test 23 User** | dynamický | test                   | test           | per-test  | TC23       |
+| **Test 24 User** | dynamický | test                   | test           | per-test  | TC24       |
+
 ---
 
 ### Ošetření selhání registrace uživatele
 
-U všech tří typů uživatelů je používán **dynamicky generovaný email**, což minimalizuje riziko kolizí s cizími testovacími daty na veřejném demo e-shopu.
+U všech uživatelů je používán **dynamicky generovaný email**, což minimalizuje riziko kolizí s cizími testovacími daty na veřejném demo e-shopu.
 
 Přesto jsou:
-- všechny **fixtures a test pro Test Case 1, 14 ošetřeny chybovou hláškou** pro případ, že by se i přesto pokusily o registraci s již existujícím emailem,
+- všechny **fixtures a testy s registrací uživatele ošetřeny chybovou hláškou** pro případ, že by se i přesto pokusily o registraci s již existujícím emailem,
 - pro ladění je doporučeno spouštění testů s příznaky:
 
 ```bash
@@ -189,12 +208,13 @@ Soubor `tests/conftest.py` obsahuje klíčové fixtures:
 
 | **FIXTURE**       | **SCOPE** | **AUTOMATICKÉ SPUŠTĚNÍ** | **VÝSLEDEK** |
 |-------------------|-----------|--------------------------|--------------|
-| `accept_gdpr`     | session   | Ano                      | přijetí GDPR |
-| `browser_context` | session   | Ne                       | sdílený prohlížeč a kontext pro všechny testy |
+| `browser`         | session   | Ne                       | sdílený prohlížeč |
+| `context_gdpr`    | function  | Ne                       | nový izolovaný kontext se zpracovaným GDPR pro každý test |
 | `page`            | function  | Ne                       | nová stránka s domovskou URL pro každý test |
-| `temp_user`       | function  | Ne                       | uživatel **Temp User** unikátní pro každý test, smazán na konci testu |
 | `session_user`    | session   | Ano                      | uživatel **Session User** pro celou session, smazán na konci všech testů |
-
+| `test_2_user`     | function  | Ne                       | uživatel **Test_2 User** unikátní pro TC02, smazán na konci testu |
+| `test_16_user`    | function  | Ne                       | uživatel **Test_16 User** unikátní pro TC16, smazán na konci testu |
+| `test_20_user`    | function  | Ne                       | uživatel **Test_20 User** unikátní pro TC20, smazán na konci testu |
 
 ## Spuštění testů
 

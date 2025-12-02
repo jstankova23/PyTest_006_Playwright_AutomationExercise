@@ -1,11 +1,11 @@
 # Sada automatizovaných testů (pytest) na demo e-shop webu 'https://automationexercise.com/'
-# testy volají fixtures 'page', 'browser_context', 'accept_gdpr' definované v souboru conftest.py;
+# testy volají fixtures definované v souboru conftest.py;
 # testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases)
 
 from playwright.sync_api import Page, expect
 
 # 12_TEST CASE: Add Products in Cart
-# TEST PŘIDÁNÍ PRVNÍCH DVOU PRODUKTŮ DO NÁKUPNÍHO KOŠÍKU SE ZÁVĚREČNOU KONTROLOU KOŠÍKU
+# TEST PŘIDÁNÍ PRVNÍCH DVOU PRODUKTŮ DO NÁKUPNÍHO KOŠÍKU BEZ PŘIHLÁŠENÍ UŽIVATELE, SE ZÁVĚREČNOU KONTROLOU KOŠÍKU
 def test_product_cart(page: Page):
     # 1. Launch browser; 
     # 2. Navigate to home url;
@@ -13,26 +13,26 @@ def test_product_cart(page: Page):
     assert page.url == "https://automationexercise.com/"             # ověření, že fixture 'page' otevřela správnou url
     
     # 4. Click on 'Products' button
-    products_link = page.get_by_role("link", name=" Products")     # lokátor pro vyhledání linku pro 'Products' stránku
+    products_link = page.get_by_role("link", name=" Products")     # lokátor pro vyhledání linku pro 'Products' podstránku v záhlaví domovské stránky
     products_link.click()                                           # kliknutí na link 'Products'
     
     # 5. Hover over first product and click 'Add to cart'
     ### Seznam produktů je na stránce reprezentovaný gridem / mřížkou karet produktů;
     ### každý produkt = jedna karta (v gridu / mřížce)
     ### všechny karty mají stejnou třídu <div class="product-image-wrapper">...</div>
-    products = page.locator(".product-image-wrapper")       # CSS lokátor pro seznam všech karet v gridu / mřížce, tzn. karty všech produktů na stránce
+    products = page.locator(".product-image-wrapper")       # CSS lokátor pro kolekci všech karet v gridu / mřížce, tzn. karty všech produktů na stránce
 
     ###### a) Vyhledání 1. produktu dle ID přes href v mřížce a hover
     product_1 = products.filter(has=page.locator("a[data-product-id='1']")).first # vyhledání první karty produktu z mřížky (products), která obsahuje odkaz na detail produktu s daným ID
     product_1.scroll_into_view_if_needed() # pokud je karta produktu mimo viditelnou část stránky, Playwright ji posune do zorného pole, overlay se často aktivuje jen na viditelné kartě
     product_1.hover()                      # simulace najetí myší na kartu produktu, tím se zobrazí overlay vrstva (.product-overlay) a v ní tlačítko 'Add to cart'
 
-    ###### b) Kliknutí na tlačítko 'Add to Cart'
+    ###### b) Overlay vrstva: Kliknutí na tlačítko 'Add to Cart'
     add_to_cart_prod1_btn = product_1.locator(".overlay-content .btn") # vyhledání tlačítka 'Add to Cart' v overlay vrstvě (vnořený lokátor) UVNITŘ TÉTO KONKRÉTNÍ KARTY produktu 
     add_to_cart_prod1_btn.wait_for(state="visible") # vyčkání, až se overlay vrstva skutečně ukáže
     add_to_cart_prod1_btn.click(force=True)         # kliknutí na tlačítko 'Add to Cart', i když ho dočasně něco překrývá, klik i při krátkém překrytí karty produktu
 
-    # 6. Click 'Continue Shopping' button
+    # 6. Modal: Click 'Continue Shopping' button
     continue_shop_btn = page.get_by_role("button", name="Continue Shopping") # lokátor pro tlačítko 'Continue Shopping'
     continue_shop_btn.wait_for(state="visible")                              # vyčkání na plné zobrazení modalu 
     continue_shop_btn.click()                                                # kliknutí na tlačítko 'Continue Shopping' v modalu
@@ -44,13 +44,13 @@ def test_product_cart(page: Page):
     product_2.scroll_into_view_if_needed()  
     product_2.hover()
 
-    ###### b) Kliknutí na tlačítko 'Add to Cart'
+    ###### b) Overlay vrstva: Kliknutí na tlačítko 'Add to Cart'
     add_to_cart_prod7_btn = product_2.locator(".overlay-content .btn")
     add_to_cart_prod7_btn.wait_for(state="visible") 
     add_to_cart_prod7_btn.click(force=True)
     
 
-    # 8. Click 'View Cart' button
+    # 8. Modal: Click 'View Cart' button
     view_cart_link = page.get_by_role("link", name="View Cart")             # lokátor pro link 'View Cart' v zobrazeném modalu
     view_cart_link.wait_for(state="visible")                                # vyčkání na plné zobrazení modalu 
     view_cart_link.click()                                                  # kliknutí na link 'View Cart'

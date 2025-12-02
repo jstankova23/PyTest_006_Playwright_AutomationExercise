@@ -1,5 +1,5 @@
 # Sada automatizovaných testů (pytest) na demo e-shop webu 'https://automationexercise.com/'
-# testy volají fixtures 'page', 'browser_context', 'accept_gdpr' definované v souboru conftest.py;
+# testy volají fixtures definované v souboru conftest.py;
 # testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases)
 
 from playwright.sync_api import Page, expect
@@ -28,12 +28,12 @@ def test_order_reg_checkout(page: Page):
     product_3.scroll_into_view_if_needed() # pokud je karta produktu mimo viditelnou část stránky, Playwright ji posune do zorného pole, overlay se často aktivuje jen na viditelné kartě
     product_3.hover()                      # simulace najetí myší na kartu produktu, tím se zobrazí overlay vrstva (.product-overlay) a v ní tlačítko 'Add to cart'
 
-    ###### b) Kliknutí na tlačítko 'Add to Cart'
+    ###### b) Overlay vrstva: Kliknutí na tlačítko 'Add to Cart'
     add_to_cart_prod3_btn = product_3.locator(".overlay-content .btn") # vyhledání tlačítka 'Add to Cart' v overlay vrstvě (vnořený lokátor) UVNITŘ TÉTO KONKRÉTNÍ KARTY produktu 
     add_to_cart_prod3_btn.wait_for(state="visible") # vyčkání, až se overlay vrstva skutečně ukáže
     add_to_cart_prod3_btn.click(force=True)         # kliknutí na tlačítko 'Add to Cart', i když ho dočasně něco překrývá, klik i při krátkém překrytí karty produktu
 
-    ###### c) Kliknutí na tlačítko 'Continue Shopping' v modalu (popup / vyskakovací okno s tlačítkem 'Continue Shopping')
+    ###### c) Modal: Kliknutí na tlačítko 'Continue Shopping' v modalu (popup / vyskakovací okno s tlačítkem 'Continue Shopping')
     continue_shop_btn = page.get_by_role("button", name="Continue Shopping") # lokátor pro tlačítko 'Continue Shopping'
     continue_shop_btn.wait_for(state="visible")                              # vyčkání na plné zobrazení modalu 
     continue_shop_btn.click()                                                # kliknutí na tlačítko 'Continue Shopping' v modalu
@@ -46,12 +46,12 @@ def test_order_reg_checkout(page: Page):
     product_4.scroll_into_view_if_needed()  
     product_4.hover()
 
-    ###### b) Kliknutí na tlačítko 'Add to Cart'
+    ###### b) Overlay vrstva: Kliknutí na tlačítko 'Add to Cart'
     add_to_cart_prod4_btn = product_4.locator(".overlay-content .btn")
     add_to_cart_prod4_btn.wait_for(state="visible") 
     add_to_cart_prod4_btn.click(force=True)
 
-    ###### c) Kliknutí na tlačítko 'Continue Shopping'
+    ###### c) Modal: Kliknutí na tlačítko 'Continue Shopping'
     continue_shop_btn = page.get_by_role("button", name="Continue Shopping")
     continue_shop_btn.wait_for(state="visible") 
     continue_shop_btn.click()
