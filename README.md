@@ -20,7 +20,7 @@ Tento projekt obsahuje sadu 26 testů v Pythonu s využitím **pytest + Playwrig
 [automationexercise.com](https://automationexercise.com/). 
 Testy následují oficiální [Test Cases](https://automationexercise.com/test_cases).
 Projekt obsahuje pozitivní a negativní testy registrace uživatele, jeho přihlášení a odhlášení, komunikaci s e-shop webem přes kontaktní formulář s odesláním souboru v příloze, vyhledávání produktů, odběr novinek a veškerou manipulaci s objednávkou a fakturou. Testy pracují s produkty,
-které jsou na stránkách demo e-shopu koncipovány jako karty zabalené v do obalu (wrapper) v mřížce. Pro vložení produktu je nutný hover nad danou
+které jsou na stránkách demo e-shopu koncipovány jako karty zabalené do obalu (wrapper) v mřížce. Pro vložení produktu je nutný hover nad danou
 kartou produktu, což vyvolá překrývací overlay vrstvu s nabídkou tlačítek nutných k nákupu. Testy pracují i s modálními okny a JavaScript alertem.
 
 ## PyTest + Playwright – AutomationExercise
@@ -90,6 +90,7 @@ PyTest_006_Playwright_AutomationExercise/
 │   ├── test_18_pw_filter_categories_home_page.py
 │   ├── test_19_pw_filter_brands_products_page.py
 │   ├── test_20_pw_login_after_cart.py
+│   ├── test_21_pw_product_review.py
 │   └── test_files/
 │       └── Sample.docx                      příloha pro test 'test_06_pw_contact_file_alert.py'
 ├── .gitignore
@@ -168,8 +169,8 @@ Ostatní uživatelé jsou **unikátní pro každý test**. Liší se pouze způs
 | **Test 2 User**  | dynamický | fixture `test_2_user`  | test / fixture | per-test  | TC02       |
 | **Test 14 User** | dynamický | test                   | test           | per-test  | TC14       |
 | **Test 15 User** | dynamický | test                   | test           | per-test  | TC15       |
-| **Test 16 User** | dynamický | fixture `test_16_user` | test           | per-test  | TC16       |
-| **Test 20 User** | dynamický | fixture `test_20_user` | test           | per-test  | TC20       |
+| **Test 16 User** | dynamický | fixture `test_16_user` | test / fixture | per-test  | TC16       |
+| **Test 20 User** | dynamický | fixture `test_20_user` | fixture        | per-test  | TC20       |
 | **Test 23 User** | dynamický | test                   | test           | per-test  | TC23       |
 | **Test 24 User** | dynamický | test                   | test           | per-test  | TC24       |
 

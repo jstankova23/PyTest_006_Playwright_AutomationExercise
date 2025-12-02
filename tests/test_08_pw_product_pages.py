@@ -32,10 +32,10 @@ def test_product_pages(page: Page):
     products = page.locator(".product-image-wrapper")    # CSS lokátor pro seznam všech karet v mřížce, tzn. karty všech produktů na stránce
     expect(products.first).to_be_visible(timeout=2000)   # časová rezerva na vyobrazení karty 1. produktu na nové stránce
 
+
     # 7. Click on 'View Product' of first product
-    ### 1. karta / produkt: .product-image-wrapper.first nebo .product-image-wrapper.nth(0)
-    view_product1_link = page.locator(".nav.nav-pills.nav-justified > li > a").first     # lokalizátor pro link 'View Product' u 1. zobrazeného produktu
-    view_product1_link.click()                                                           # kliknutí na link
+    view_product_1 = page.locator("a[href='/product_details/1']")       # lokalizátor pro link 'View Product' u 1. zobrazeného produktu
+    view_product_1.click()                                              # kliknutí na link
     
                                                      
     # 8. User is landed to product detail page

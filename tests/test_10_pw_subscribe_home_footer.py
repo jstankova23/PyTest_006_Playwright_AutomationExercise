@@ -30,14 +30,16 @@ def test_subscibe_home_footer(page: Page):
     subs_arrow_btn.click() # kliknutí na tlačítko s šipkou
 
     # 7. Verify success message 'You have been successfully subscribed!' is visible
-    ###	Po zadání emailu pro odběr novinek a jeho odeslání (klik na šipku vedle emailu) se zobrazí jen krátce hláška o úspěšném odeslání.
-    ###	Pro získání CSS selektoru pro danou hlášku z DevTools je nutné po zadání emailu pro odběr novinek provést zastavení běhu na JavaScriptu na události kliknutí.
-    ### DevTools - záložka Sources - Event Listener Breakpoints/ Mouse / Click
-    ### Pak kliknout na šipku vedle emailu (potvrdit odeslání emailu pro odběr novinek) a šipkou na debugovací liště postupně odkrokovat JS kód do stavu zobrazení hlášky.
-    ### V momentu zobrazení hlášky je možné získat už v záložce Elements její CSS lokátor.
-    success_subs_msg = page.locator(".alert-success")      # CSS lokátor na dočasnou notifikaci v DOM získaný zastavením běhu na JS na události v DevTools
+    ###	Po kliknutí na šipku vedle emailu se zobrazí jen krátce hláška o úspěšné registraci emailu k odběru novinek.
+    ###	Pokud se nedaří získat selektor z DevTools během krátkého zobrazení hlášky, pak je nutné těsně před vyvoláním hlášky 
+    ### (tzn. před kliknutím na šipku za emailem) provést v DevTools zastavení běhu na JavaScriptu na události typu 'kliknutí':
+    ### - DevTools - záložka Sources - Event Listener Breakpoints/ Mouse / Click
+    ### - kliknout na šipku vedle emailu (potvrdit odeslání emailu pro odběr novinek)
+    ### - šipkou na debugovací liště postupně krokovat až do momentu zobrazení dané hlášky
+    ### - kliknout na ikonku pro získání selektoru a označit danou hlášku
+    ### - v záložce Elements dle označení pozice elementu v DOM sestavit si ručně CSS lokátor unikátní pro danou stránku
+    ### - třída 'alert-success' není na stránce unikátní, tuto třídu využívá i hláška po úspěšně odeslaném review na produkt (TC21)
+    success_subs_msg = page.locator("#success-subscribe")  # CSS lokátor na dočasnou hlášku, nutné ID, třída 'alert-success' by nestačila
     expect(success_subs_msg).to_be_visible(timeout=1000)   # vyčkání na zobrazení dočasné hlášky
-
-
     
    
