@@ -4,9 +4,9 @@ Automatizované UI testy pro demo e‑shop https://automationexercise.com/ pomoc
 > Projekt je aktuálně v aktivním vývoji (work in progress).
 
 **Autor:**                      Jana Staňková  
-**Verze projektu:**             0.7.5 
+**Verze projektu:**             0.9.5 
 **Datum vytvoření:**            11. 11. 2025  
-**Datum poslední aktualizace:** 2. 12. 2025 
+**Datum poslední aktualizace:** 4. 12. 2025 
 **Python:**                     3.10+  
 **Licence:**                    MIT  
 
@@ -25,8 +25,7 @@ kartou produktu, což vyvolá překrývací overlay vrstvu s nabídkou tlačíte
 
 ## PyTest + Playwright – AutomationExercise
 
-Testy jsou psány pomocí frameworků **Playwright** a **PyTest** a jsou
-navrženy s důrazem na:
+Testy jsou psány pomocí frameworků **Playwright** a **PyTest** a jsou navrženy s důrazem na:
 - plnou izolaci jednotlivých testů,
 - opakovatelnost běhu,
 - stabilitu při hromadném spouštění,
@@ -44,8 +43,7 @@ navrženy s důrazem na:
 
 ## GDPR a uložený stav prohlížeče
 
-Projekt využívá soubor **gdpr.json**, který obsahuje uložený stav prohlížeče (cookies + localStorage) po odsouhlasení GDPR a je uložen
-v kořenovém adresáři projektu.
+Projekt využívá soubor **gdpr.json**, který obsahuje uložený stav prohlížeče (cookies + localStorage) po odsouhlasení GDPR a je uložen v kořenovém adresáři projektu.
 
 Tento stav je při spuštění každého testu načítán do nového browser contextu pomocí fixture `context_gdpr`.
 
@@ -91,6 +89,7 @@ PyTest_006_Playwright_AutomationExercise/
 │   ├── test_19_pw_filter_brands_products_page.py
 │   ├── test_20_pw_login_after_cart.py
 │   ├── test_21_pw_product_review.py
+│   ├── test_22_pw_recommended_items.py
 │   └── test_files/
 │       └── Sample.docx                      příloha pro test 'test_06_pw_contact_file_alert.py'
 ├── .gitignore
@@ -189,20 +188,6 @@ pytest -s -v
 
 ---
 
-## Notifikace
-
-V rámci testů v Playwrightu jsou zpracovávány různé typy notifikací:
-
-1. **JavaScript alert se zpožděným výskytem**  
-   Test Case 6 – Contact Us Form  
-   `test_06_pw_contact_file_alert.py`
-
-2. **Dočasná notifikační hláška v DOM (flash message / success message)**  
-   Test Case 10 – Verify Subscription in home page  
-   `test_10_pw_subscribe_footer.py`
-
----
-
 ## Fixtures (conftest.py)
 
 Soubor `tests/conftest.py` obsahuje klíčové fixtures:
@@ -216,6 +201,83 @@ Soubor `tests/conftest.py` obsahuje klíčové fixtures:
 | `test_2_user`     | function  | Ne                       | uživatel **Test_2 User** unikátní pro TC02, smazán na konci testu |
 | `test_16_user`    | function  | Ne                       | uživatel **Test_16 User** unikátní pro TC16, smazán na konci testu |
 | `test_20_user`    | function  | Ne                       | uživatel **Test_20 User** unikátní pro TC20, smazán na konci testu |
+
+---
+
+## Notifikace
+
+V rámci testů v Playwrightu jsou zpracovávány různé typy notifikací:
+
+1. **JavaScript alert se zpožděným výskytem**  
+   Test Case 6 – Contact Us Form  (`test_06_pw_contact_file_alert.py`)
+   
+2. **Dočasná notifikační hláška v DOM (flash message / success message)**  
+   Test Case 10 – Verify Subscription in home page (`test_10_pw_subscribe_footer.py`) 
+   Test Case 21 – Add review on product (`test_21_pw_product_review.py`)
+
+---
+
+## Práce s produkty a kontejnery produktových karet
+
+Aplikace **automationexercise.com** obsahuje **dva samostatné seznamy stejných produktů**, které se však liší způsobem zobrazení i způsobem vkládání do košíku. 
+Z tohoto důvodu testy pracují se **dvěma oddělenými kontejnery produktů**. 
+Na **Home Page existují současně oba dva seznamy stejných produktů**: - jeden v horní části stránky v sekci **FEATURES ITEMS** (statický grid) a druhý ve spodní
+části stránky v sekci **RECOMMENDED  ITEMS** (carousel).
+
+Oba seznamy: - obsahují shodné produkty, - používají stejné vnitřní třídy (`.product-image-wrapper`, `.single-products`, `a[data-product-id]`).
+
+Proto je **nutné vždy nejprve zúžit výběr na správný kontejner**, **a až poté vyhledávat konkrétní produkt podle `data-product-id`**. Logika výběru produktů je
+postavena **na kontejneru**, nikoli pouze na kolekci karet produktů (`.product-image-wrapper`), nedochází tak ke kolizi mezi horní a spodní sekcí na Home Page.
+
+**VÝZNAM**:       kontejner                                > kolekce karet                            > produkt
+**PROMĚNNÁ**:     features_container/recommended_cotainer  > features_products/recommended_products   > product_XX (XX - pořadové číslo na stránce pro uživatele)
+**CSS SELEKTOR**: div.features_items/div.recommended_items > .product-image-wrapper                   > a[data-product-id="YY"]
+                                                                                                        product_id = "YY" (YY - ID productu v DOM)
+
+                          
+### 1) FEATURES ITEMS -- statická mřížka produktů (grid)
+
+Tento kontejner se nachází **na Home Page -- v horní části stránky** a na dalších podstránkách (products, products?search, brand_products, category_products).
+
+**Kontejner pro FEATURES ITEMS:**
+
+``` python
+features_container = page.locator("div.features_items")                  # kontejner
+features_products = features_container.locator(".product-image-wrapper") # kolekce karet
+product_id = "YY"                                                        # ID produktu (pořadové číslo produktu z aplikace neodpovídá vždy ID produktu)                           
+product_XX = features_products.filter(has=page.locator(f'a[data-product-id="{product_id}"]') # produkt 
+```
+
+**Charakteristika:** - statická mřížka karet, - žádný pohyb ani carousel, - pro zobrazení tlačítka **Add to Cart je nutný hover nad kartou produktu**,
+ - po hoveru se zobrazí **overlay vrstva** s tlačítky, - **tlačítko 'Add to Cart' je přístupné pouze v overlay vrstvě**.
+
+**Používá se v testech:** 
+- horní část domovské stránky   (FEATURES ITEMS): TC12, TC14, TC15, TC16, TC17 \
+- podstránka products           (ALL PRODUCTS): TC08 (test bez nákupu) \
+- podstránka products?search    (SEARCHED ITEMS): TC20
+- podstránka brand_products     (BRAND - XXX PRODUCTS): TC19 (test bez nákupu) \
+- podstránka category_products  (CATEGORY PRODUCTS): TC18 (test bez nákupu)
+
+
+### 2) RECOMMENDED ITEMS -- carousel doporučených produktů
+
+Tento kontejner se nachází **pouze na Home Page -- ve spodní části stránky**.
+
+**Kontejner pro RECOMMENDED ITEMS:**
+
+``` python
+recommended_container = page.locator("div.recommended_items")                  # kontejner
+recommended_products = recommended_container.locator(".product-image-wrapper") # kolekce karet
+product_id = "YY"                                                              # ID produktu (pořadové číslo produktu z aplikace neodpovídá vždy ID produktu)                           
+product_XX = recommended_products.filter(has=page.locator(f'a[data-product-id="{product_id}"]') # produkt 
+```
+
+**Charakteristika:** - pohyblivý **carousel / slider**, - produkty mění třídy `item active`, `item`, `item next left` a nákup je možný u produktu pouze ve stavu s třídou
+`item active`, - **není potřeba hover**. **Tlačítko 'Add to Cart' je vždy přímo viditelné** na kartě, - ovládání pomocí šipek slideru.
+
+**Používá se v testech:** - TC22
+
+---
 
 ## Spuštění testů
 

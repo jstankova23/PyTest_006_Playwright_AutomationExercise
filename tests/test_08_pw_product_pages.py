@@ -2,6 +2,21 @@
 # testy volají fixtures definované v souboru conftest.py;
 # testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases)
 
+"""
+
+VÝZNAM:       kontejner                                > kolekce karet                            > produkt
+PROMĚNNÁ:     features_container/recommended_cotainer  > features_products/recommended_products   > product_XX (XX - pořadové číslo na stránce pro uživatele)
+CSS SELEKTOR: div.features_items/div.recommended_items > .product-image-wrapper                   > a[data-product-id="YY"]
+                                                                                                    product_id = "YY" (YY - ID productu v DOM)
+
+Kontejner pro FEATURES ITEMS:
+features_container = page.locator("div.features_items")                  # kontejner
+features_products = features_container.locator(".product-image-wrapper") # kolekce karet
+product_id = "YY"                                                        # ID produktu (pořadové číslo produktu z aplikace neodpovídá vždy ID produktu)                           
+product_XX = features_products.filter(has=page.locator(f'a[data-product-id="{product_id}"]') # produkt 
+
+"""
+
 from playwright.sync_api import Page, expect
 
 # 08_TEST CASE: Verify All Products and product detail page
@@ -26,11 +41,12 @@ def test_product_pages(page: Page):
 
 
     # 6. The products list is visible
-    ### Seznam produktů je na stránce reprezentovaný gridem / mřížkou karet produktů;
-    ### každý produkt = jedna karta (v gridu / mřížce)
-    ### všechny karty mají stejnou třídu <div class="product-image-wrapper">...</div>
-    products = page.locator(".product-image-wrapper")    # CSS lokátor pro seznam všech karet v mřížce, tzn. karty všech produktů na stránce
-    expect(products.first).to_be_visible(timeout=2000)   # časová rezerva na vyobrazení karty 1. produktu na nové stránce
+    ### Seznam produktů je reprezentovaný gridem / mřížkou karet produktů;
+    ### Každý produkt = jedna karta (v gridu / mřížce)
+    ### Všechny karty mají stejnou třídu <div class="product-image-wrapper">...</div>
+    features_container = page.locator("div.features_items")        # lokátor pro kontejner/sekci features items položek v horní části home page
+    features_products = features_container.locator(".product-image-wrapper") # vnořený lokátor, kolekce všech karet produktů v kontejneru/sekci features items položek
+    expect(features_products.first).to_be_visible(timeout=2000)   # časová rezerva na vyobrazení karty 1. produktu na nové stránce
 
 
     # 7. Click on 'View Product' of first product

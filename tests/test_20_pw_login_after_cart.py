@@ -2,6 +2,21 @@
 # testy volají fixtures definované v souboru conftest.py;
 # testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases)
 
+"""
+
+VÝZNAM:       kontejner                                > kolekce karet                            > produkt
+PROMĚNNÁ:     features_container/recommended_cotainer  > features_products/recommended_products   > product_XX (XX - pořadové číslo na stránce pro uživatele)
+CSS SELEKTOR: div.features_items/div.recommended_items > .product-image-wrapper                   > a[data-product-id="YY"]
+                                                                                                    product_id = "YY" (YY - ID productu v DOM)
+
+Kontejner pro FEATURES ITEMS:
+features_container = page.locator("div.features_items")                  # kontejner
+features_products = features_container.locator(".product-image-wrapper") # kolekce karet
+product_id = "YY"                                                        # ID produktu (pořadové číslo produktu z aplikace neodpovídá vždy ID produktu)                           
+product_XX = features_products.filter(has=page.locator(f'a[data-product-id="{product_id}"]') # produkt
+
+"""
+
 from playwright.sync_api import Page, expect
 
 # 20_TEST CASE: Search Products and Verify Cart After Login
@@ -55,12 +70,13 @@ def test_product_search(page: Page, test_20_user):                  # parametrem
     ### Seznam nalezených produktů je reprezentován gridem / mřížkou karet produktů
     ### Každý produkt = jedna karta v gridu
     ### Všechny karty mají stejnou třídu <div class="product-image-wrapper">...</div>
-    products = page.locator(".product-image-wrapper")   # kolekce všech produktových karet na stránce
-    products_count = products.count()                   # zjištění počtu nalezených karet, nutné pro kontrolu počtu produktů v košíku v krocích 9b) a 12
+    features_container = page.locator("div.features_items")                      # lokátor pro kontejner/sekci features items položek v horní části home page
+    features_products = features_container.locator(".product-image-wrapper")     # vnořený lokátor, kolekce všech karet produktů v kontejneru/sekci features items položek
+    products_count = features_products.count()                   # zjištění počtu nalezených karet, nutné pro kontrolu počtu produktů v košíku v krocích 9b) a 12
 
     ### Smyčka pro přidání všech nalezených produktů do košíku
     for i in range(products_count):
-        product_card = products.nth(i)
+        product_card = features_products.nth(i)
 
         # a) Scroll + hover nad konkrétní kartou produktu (hover je nutný, zobrazí se overlay vrstva s tlačítkem 'Add to Cart')
         ### SCROLL: Pokud je karta produktu mimo viditelnou část stránky, Playwright ji posune do zorného pole, overlay se často aktivuje jen na viditelné kartě
@@ -74,7 +90,7 @@ def test_product_search(page: Page, test_20_user):                  # parametrem
         add_to_cart_btn.click(force=True)                               # vynucený klik (kvůli překrývání)
 
         # c) Modální okénko: Kliknutí na 'Continue Shopping' a zavření modalu
-        ### Po předchozím kliknutí na tlačítko 'Add to Cart' se objeví modal s tlačítkem 'Continue Shopping' nebo 'View Cart'
+        ### Po předchozím kliknutí na tlačítko 'Add to Cart' se objeví modal s tlačítkem 'Continue Shopping' nebo s linkem 'View Cart'
         continue_shop_btn = page.get_by_role("button", name="Continue Shopping")       # lokátor pro tlačítko 'Continue Shopping' v modalu
         continue_shop_btn.wait_for(state="visible")                                    # vyčkání na zobrazení modalového okénka s požadovaným tlačítkem
         continue_shop_btn.click()                                                      # kliknutí na tlačítko
@@ -129,7 +145,7 @@ def test_product_search(page: Page, test_20_user):                  # parametrem
     ### Ověření, že počet produktů v košíku po loginu se rovná počtu vyhledaných produktů z kroku 8
     ### Princip kontroly je stejný jako u kroku 9 b) před loginem
     cart_rows_after_login = page.locator("tr[id^='product-']")
-    expect(cart_rows_after_login).to_have_count(products_count)
+    expect(cart_rows_after_login).to_have_count(products_count)         # proměnná 'product_counts' definovaná v kroku 8
 
 
 

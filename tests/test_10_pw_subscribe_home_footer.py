@@ -17,7 +17,7 @@ def test_subscibe_home_footer(page: Page):
     subs_heading.scroll_into_view_if_needed() # skrolování do zápatí k nadpisu "SUBSCRIPTION"
 
     # 5. Verify text 'SUBSCRIPTION'
-    expect(subs_heading).to_be_visible(timeout=500)  # ověření, že Playwright našel v zápatí požadovaný nadpis (lokátor s kroku 4)
+    expect(subs_heading).to_be_visible(timeout=500)  # ověření, že Playwright našel v zápatí požadovaný nadpis (lokátor z kroku 4)
 
     # 6. Enter email address in input and click arrow button
     ### Zadání emailu pro odběr novinek

@@ -2,6 +2,21 @@
 # testy volají fixtures definované v souboru conftest.py;
 # testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases)
 
+"""
+
+VÝZNAM:       kontejner                                > kolekce karet                            > produkt
+PROMĚNNÁ:     features_container/recommended_cotainer  > features_products/recommended_products   > product_XX (XX - pořadové číslo na stránce pro uživatele)
+CSS SELEKTOR: div.features_items/div.recommended_items > .product-image-wrapper                   > a[data-product-id="YY"]
+                                                                                                    product_id = "YY" (YY - ID productu v DOM)
+
+Kontejner pro FEATURES ITEMS:
+features_container = page.locator("div.features_items")                  # kontejner
+features_products = features_container.locator(".product-image-wrapper") # kolekce karet
+product_id = "YY"                                                        # ID produktu (pořadové číslo produktu z aplikace neodpovídá vždy ID produktu)                           
+product_XX = features_products.filter(has=page.locator(f'a[data-product-id="{product_id}"]') # produkt 
+
+"""
+
 from playwright.sync_api import Page, expect
 import uuid                                             # kvůli generování emailu v kroku 9 b)
 
@@ -17,14 +32,16 @@ def test_order_reg_checkout(page: Page):
 
     # 4. Add products to cart
     ### Přidání 3. a 4. produktu dle pořadí zobrazení na stránce do košíku, identifikace konkrétních produktů probíhá ale podle jejich ID v DOM (ID neodpovídá vždy pořadí na stránce).   
-    ### Seznam produktů je na stránce reprezentovaný gridem / mřížkou karet produktů;
-    ### každý produkt = jedna karta (v gridu / mřížce)
-    ### všechny karty mají stejnou třídu <div class="product-image-wrapper">...</div>
-    products = page.locator(".product-image-wrapper")   # CSS lokátor pro seznam všech karet v gridu / mřížce, tzn. karty všech produktů na stránce
-
+    ### Seznam produktů je v horní části home page v sekci FEATURES ITEMS reprezentovaný gridem / mřížkou karet produktů;
+    ### Každý produkt = jedna karta (v gridu / mřížce)
+    ### Všechny karty mají stejnou třídu <div class="product-image-wrapper">...</div>
+    features_container = page.locator("div.features_items")                      # lokátor pro kontejner/sekci features items položek v horní části home page
+    features_products = features_container.locator(".product-image-wrapper")     # vnořený lokátor, kolekce všech karet produktů v kontejneru/sekci features items položek
+    
     ### Přidání 3. produktu do košíku
     ###### a) Vyhledání 3. produktu dle ID přes href v mřížce a hover
-    product_3 = products.filter(has=page.locator("a[data-product-id='3']")).first # vyhledání první karty produktu z mřížky (products), která obsahuje odkaz na detail produktu s daným ID
+    product_id = "3"
+    product_3 = features_products.filter(has=page.locator(f"a[data-product-id='{product_id}']")).first # vyhledání první karty produktu z mřížky (products), která obsahuje odkaz na detail produktu s daným ID
     product_3.scroll_into_view_if_needed() # pokud je karta produktu mimo viditelnou část stránky, Playwright ji posune do zorného pole, overlay se často aktivuje jen na viditelné kartě
     product_3.hover()                      # simulace najetí myší na kartu produktu, tím se zobrazí overlay vrstva (.product-overlay) a v ní tlačítko 'Add to cart'
 
@@ -42,7 +59,8 @@ def test_order_reg_checkout(page: Page):
 
     ### Přidání 4. produktu do košíku
     ###### a) Vyhledání 4. produktu dle ID přes href v gridu a hover
-    product_4 = products.filter(has=page.locator("a[href='/product_details/4']")).first  
+    product_id = "4"
+    product_4 = features_products.filter(has=page.locator(f"a[data-product-id='{product_id}']")).first 
     product_4.scroll_into_view_if_needed()  
     product_4.hover()
 

@@ -2,10 +2,25 @@
 # testy volají fixtures definované v souboru conftest.py;
 # testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases)
 
+"""
+
+VÝZNAM:       kontejner                                > kolekce karet                            > produkt
+PROMĚNNÁ:     features_container/recommended_cotainer  > features_products/recommended_products   > product_XX (XX - pořadové číslo na stránce pro uživatele)
+CSS SELEKTOR: div.features_items/div.recommended_items > .product-image-wrapper                   > a[data-product-id="YY"]
+                                                                                                    product_id = "YY" (YY - ID productu v DOM)
+
+Kontejner pro FEATURES ITEMS:
+features_container = page.locator("div.features_items")                  # kontejner
+features_products = features_container.locator(".product-image-wrapper") # kolekce karet
+product_id = "YY"                                                        # ID produktu (pořadové číslo produktu z aplikace neodpovídá vždy ID produktu)                           
+product_XX = features_products.filter(has=page.locator(f'a[data-product-id="{product_id}"]') # produkt
+
+"""
+
 from playwright.sync_api import Page, expect
 
 # 18_TEST CASE: View Category Products
-# TEST FILTRACE PRODUKTŮ PODLE ZNAČEK Z PODSTRÁNKY PRODUCTS S OVĚŘENÍM ZOBRAZENÍ PRODUKTŮ
+# TEST FILTRACE PRODUKTŮ PODLE ZNAČEK Z PODSTRÁNKY PRODUCTS S OVĚŘENÍM ZOBRAZENÍ PRODUKTŮ, BEZ NÁKUPU
 def test_filter_brands_products_page(page: Page):
     # 1. Launch browser; 
     # 2. Navigate to home url;
@@ -36,17 +51,9 @@ def test_filter_brands_products_page(page: Page):
 
     ### c) Ověření, že jsou zobrazeny produkty
     ### Ověření, že filtrace vrátila alespoň jeden produkt (netestuje se pevný počet)
-    
-    ### Hierarchie prvků v DOM (dle DevTools): 
-    ###### kontejner          > kolekce karet (s ID jedna konkrétní karta) > vnitřní obsah karty
-    ###### div.features_items > .product-image-wrapper                     > div.single-products
-
-    ###### div.features_items     = univerzální kontejner všech karet produktů (rodič, obal výsledků)
-    ###### .product-image-wrapper = každá karta v kontejneru má tuto třídu, lokátor vrací celou kolekci karet v kontejneru, pro výběr konkrétní karty nutné uvést ID (např. tr#product-14)
-    ###### div.single-products    = vnitřní obsah jedné karty, např. název produktu, cena, tlačítka (vnuk kontejneru)
-    products_container = page.locator("div.features_items")      
-    products = products_container.locator("div.single-products") 
-    expect(products).not_to_have_count(0)                        # ověření, že výpis produktů není prázdný
+    features_container = page.locator("div.features_items")                      # lokátor pro kontejner/sekci features items položek v horní části home page
+    features_products = features_container.locator(".product-image-wrapper")     # vnořený lokátor, kolekce všech karet produktů v kontejneru/sekci features items položek
+    expect(features_products).not_to_have_count(0)
 
 
     # 7. On left side bar, click on BIBA brand link

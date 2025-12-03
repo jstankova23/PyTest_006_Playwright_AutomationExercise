@@ -2,10 +2,25 @@
 # testy volají fixtures definované v souboru conftest.py;
 # testy následující všechny požadované kroky uvedené v test cases pro daný web (https://automationexercise.com/test_cases)
 
+"""
+
+VÝZNAM:       kontejner                                > kolekce karet                            > produkt
+PROMĚNNÁ:     features_container/recommended_cotainer  > features_products/recommended_products   > product_XX (XX - pořadové číslo na stránce pro uživatele)
+CSS SELEKTOR: div.features_items/div.recommended_items > .product-image-wrapper                   > a[data-product-id="YY"]
+                                                                                                    product_id = "YY" (YY - ID productu v DOM)
+
+Kontejner pro FEATURES ITEMS:
+features_container = page.locator("div.features_items")                  # kontejner
+features_products = features_container.locator(".product-image-wrapper") # kolekce karet
+product_id = "YY"                                                        # ID produktu (pořadové číslo produktu z aplikace neodpovídá vždy ID produktu)                           
+product_XX = features_products.filter(has=page.locator(f'a[data-product-id="{product_id}"]') # produkt 
+
+"""
+
 from playwright.sync_api import Page, expect
 
 # 16: Place Order: Login before Checkout
-# TEST: LOGIN UŽIVATELE 'TEST_16 USER', OBJEDNÁNÍ 8., 9. A 10. PRODUKTU, PLATBA A SMAZÁNÍ UŽIVATELE
+# TEST: LOGIN EXISTUJÍCÍHO UŽIVATELE ('Session User'), PŘIDÁNÍ 8., 9. A 10. PRODUKTU DO KOŠÍKU Z HOME PAGE, KONTROLA OBJEDNÁVKY VČETNĚ ADRES, PLATBA A SMAZÁNÍ UŽIVATELE
 ### Fixture 'test_16_user' vytvoří dočasného uživatele s dynamickou adresou pouze pro tento test a i když tento test uživatele maže, 
 ### Fixture zajišťuje jeho výmaz pro případ, kdyby tento test nedoběhl do konce.
 def test_order_login_before_checkout(page: Page, test_16_user): # fixture 'test_16_user' vytvoří dočasného uživatele pouze pro tento test
@@ -48,15 +63,17 @@ def test_order_login_before_checkout(page: Page, test_16_user): # fixture 'test_
 
     # 7. Add products to cart
     ### Přidání 8., 9. a 10. produktu dle pořadí zobrazení na stránce do košíku, identifikace konkrétních produktů probíhá ale podle jejich ID v DOM (ID neodpovídá vždy pořadí na stránce).
-    ### Seznam produktů je na stránce reprezentovaný gridem / mřížkou karet produktů;
-    ### každý produkt = jedna karta (v gridu / mřížce)
-    ### všechny karty mají stejnou třídu <div class="product-image-wrapper">...</div>
-    products = page.locator(".product-image-wrapper")   # CSS lokátor pro seznam všech karet v gridu / mřížce, tzn. karty všech produktů na stránce
+    ### Seznam produktů je v horní části home page v sekci FEATURES ITEMS reprezentovaný gridem / mřížkou karet produktů;
+    ### Každý produkt = jedna karta (v gridu / mřížce)
+    ### Všechny karty mají stejnou třídu <div class="product-image-wrapper">...</div>
+    features_container = page.locator("div.features_items")                      # lokátor pro kontejner/sekci features items položek v horní části home page
+    features_products = features_container.locator(".product-image-wrapper")     # vnořený lokátor, kolekce všech karet produktů v kontejneru/sekci features items položek
 
 
     ### Přidání 8. produktu do košíku
     ###### a) Vyhledání 8. produktu dle ID přes href v mřížce a hover
-    product_8 = products.filter(has=page.locator("a[data-product-id='8']")).first # vyhledání první karty produktu z mřížky (products), která obsahuje odkaz na detail produktu s daným ID
+    product_id = "8"
+    product_8 = features_products.filter(has=page.locator(f"a[data-product-id='{product_id}']")).first # vyhledání první karty produktu z mřížky (products), která obsahuje odkaz na detail produktu s daným ID
     product_8.scroll_into_view_if_needed() # pokud je karta produktu mimo viditelnou část stránky, Playwright ji posune do zorného pole, overlay se často aktivuje jen na viditelné kartě
     product_8.hover()                      # simulace najetí myší na kartu produktu, tím se zobrazí overlay vrstva (.product-overlay) a v ní tlačítko 'Add to cart'
 
@@ -74,7 +91,8 @@ def test_order_login_before_checkout(page: Page, test_16_user): # fixture 'test_
 
     ### Přidání 9. produktu do košíku
     ###### a) Vyhledání 9. produktu dle ID přes href v gridu a hover
-    product_9 = products.filter(has=page.locator("a[href='/product_details/11']")).first  # POZOR: ID produktu je jiné než jeho pořadové číslo na stránce
+    product_id = "11"    # POZOR: ID produktu je jiné než jeho pořadové číslo na stránce
+    product_9 = features_products.filter(has=page.locator(f"a[data-product-id='{product_id}']")).first  # POZOR: ID produktu je jiné než jeho pořadové číslo na stránce
     product_9.scroll_into_view_if_needed()  
     product_9.hover()
 
@@ -92,7 +110,8 @@ def test_order_login_before_checkout(page: Page, test_16_user): # fixture 'test_
 
     ### Přidání 10. produktu do košíku
     ###### a) Vyhledání 10. produktu dle ID přes href v gridu a hover
-    product_10 = products.filter(has=page.locator("a[href='/product_details/12']")).first  # POZOR: ID produktu je jiné než jeho pořadové číslo na stránce
+    product_id = "12"    # POZOR: ID produktu je jiné než jeho pořadové číslo na stránce
+    product_10 = features_products.filter(has=page.locator(f"a[data-product-id='{product_id}']")).first 
     product_10.scroll_into_view_if_needed() 
     product_10.hover()
 

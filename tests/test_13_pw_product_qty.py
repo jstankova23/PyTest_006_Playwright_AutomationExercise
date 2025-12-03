@@ -49,12 +49,10 @@ def test_product_qty(page: Page):
     expect(page).to_have_url("https://automationexercise.com/view_cart")
     
     ### b) Uživatelské ověření přesměnrování (kontrola nadpisu podstránky)
-    ### ověření na základě bloku s detaily o produktu (název, kategorie, cena, dostupnost, stav, značka), tento blok není na home page, jen na stránce 'product_details'
     shopping_cart_heading = page.get_by_text("Shopping Cart")       # lokátor pro nadpis 'Shopping Cart' v záhlaví podstránky
     expect(shopping_cart_heading).to_be_visible()
 
     ### c) Kontrola množství na základě řádkového lokátoru pro daný produkt
-    ### POZOR: NUTNÁ SPECIFIKACE ŘÁDKU S PRODUKETEM, JINÉ TESTY V HROMADNÉM SPUŠTĚTNÍ VKLÁDAJÍ TAKÉ DO KOŠÍKU VE STEJNOU DOBU A NELZE KONTROLOVAT JEN OBECNÉ MNOŽSTVÍ KUSŮ V KOŠÍKU 
     cart_product_5 = page.locator("tr#product-5")                   # lokátor pro řádek 5. produktu v nákupním košíku (řádkový lokátor)             
     cart_qty = cart_product_5.locator("td.cart_quantity button")    # lokátor pro množství (tlačítko v buňce cart_quantity) u 5. produktu
     expect(cart_qty).to_have_text("4")                              # ověření množství podle textu tlačítka, nikoli podle value (nejedná se o input element)

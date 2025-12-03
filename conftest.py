@@ -5,9 +5,9 @@ PRO UI AUTOMATIZACI DEMO E-SHOPU (PLAYWRIGHT + PYTEST)
 =============================================================================================================================
 
 Autor:                      Jana Staňková
-Verze projektu:             0.7.5
+Verze projektu:             0.9.5
 Datum vytvoření:            11. 11. 2025
-Datum poslední aktualizace: 2. 12. 2025
+Datum poslední aktualizace: 4. 12. 2025
 
 Projekt: UI automatizace demo e-shopu https://automationexercise.com pomocí Playwright (sync API) a PyTest.
 
