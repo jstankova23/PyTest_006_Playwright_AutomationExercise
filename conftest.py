@@ -82,7 +82,7 @@ from playwright.sync_api import sync_playwright, Page, expect
 @pytest.fixture(scope="session")
 def browser():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, slow_mo=300)
+        browser = p.chromium.launch(headless=True, slow_mo=300)
         yield browser
         browser.close()
 
