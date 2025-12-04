@@ -6,6 +6,7 @@ from playwright.sync_api import Page, expect
 
 # 21_TEST CASE: Add review on product
 # TEST ZADÁNÍ RECENZE K PRODUKTU
+# Test ověřuje dočasnou hlášku v DOM (success alert) po potvrzení formuláře pro zadání recenze na produkt bez následného přesměrování na jinou URL
 def test_product_review(page: Page):
     # 1. Launch browser; 
     # 2. Navigate to home url;
@@ -57,7 +58,7 @@ def test_product_review(page: Page):
 
     # 9. Verify success message 'Thank you for your review.'            
     success_review_msg = page.locator("#review-section .alert-success") # CSS lokátor na dočasnou hlášku, nutné ID, třída 'alert-success' by nestačila
-    expect(success_review_msg).to_be_visible(timeout=1000) # vyčkání na zobrazení dočasné hlášky
+    expect(success_review_msg).to_be_visible(timeout=1000)              # vyčkání na zobrazení dočasné hlášky
     ###	Po kliknutí na tlačítko 'Submit' se zobrazí jen krátce hláška s poděkováním za review.
     ###	Pokud se nedaří získat selektor z DevTools během krátkého zobrazení hlášky, pak je nutné těsně před vyvoláním hlášky 
     ### (tzn. před kliknutím na tlačítko 'Submit') provést v DevTools zastavení běhu na JavaScriptu na události typu 'kliknutí':
@@ -66,5 +67,5 @@ def test_product_review(page: Page):
     ### - šipkou na debugovací liště postupně krokovat až do momentu zobrazení dané hlášky
     ### - kliknout na ikonku pro získání selektoru a označit danou hlášku
     ### - v záložce Elements dle označení pozice elementu v DOM sestavit si ručně CSS lokátor unikátní pro danou stránku
-    ### - třída 'alert-success' není na stránce unikátní, tuto třídu využívá i hláška po úspěšně odeslané žádosti o odběr novinek (TC11)
+    ### - lokátor pouze s třídou není na stránce unikátní, tuto třídu sdílí i hláška pro úspěšnou registraci k odběru novinek (TC10, TC11)
 

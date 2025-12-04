@@ -6,6 +6,7 @@ from playwright.sync_api import Page, expect
 
 # 10_TEST CASE: Verify Subscription in home page
 # TEST REGISTRACE K ODBĚRU NOVINEK ZE ZÁPATÍ DOMOVSKÉ STRÁNKY, I S POTVRZENÍM DOČASNÉ HLÁŠKY
+# Test ověřuje dočasnou hlášku v DOM (success alert) po potvrzení formuláře pro odběr novinek.
 def test_subscibe_home_footer(page: Page):
     # 1. Launch browser; 
     # 2. Navigate to home url;
@@ -14,7 +15,7 @@ def test_subscibe_home_footer(page: Page):
     
     # 4. Scroll down to footer
     subs_heading = page.get_by_role("heading", name="Subscription") # funkční lokátor nadpisu "SUBSCRIPTION" v zápatí domovské stránky
-    subs_heading.scroll_into_view_if_needed() # skrolování do zápatí k nadpisu "SUBSCRIPTION"
+    subs_heading.scroll_into_view_if_needed()                       # skrolování do zápatí k nadpisu "SUBSCRIPTION"
 
     # 5. Verify text 'SUBSCRIPTION'
     expect(subs_heading).to_be_visible(timeout=500)  # ověření, že Playwright našel v zápatí požadovaný nadpis (lokátor z kroku 4)
@@ -38,7 +39,7 @@ def test_subscibe_home_footer(page: Page):
     ### - šipkou na debugovací liště postupně krokovat až do momentu zobrazení dané hlášky
     ### - kliknout na ikonku pro získání selektoru a označit danou hlášku
     ### - v záložce Elements dle označení pozice elementu v DOM sestavit si ručně CSS lokátor unikátní pro danou stránku
-    ### - třída 'alert-success' není na stránce unikátní, tuto třídu využívá i hláška po úspěšně odeslaném review na produkt (TC21)
+    ### - lokátor pouze s třídou 'alert-success' není na stránce unikátní, tuto třídu využívá i hláška po úspěšně odeslaném review na produkt (TC21)
     success_subs_msg = page.locator("#success-subscribe")  # CSS lokátor na dočasnou hlášku, nutné ID, třída 'alert-success' by nestačila
     expect(success_subs_msg).to_be_visible(timeout=1000)   # vyčkání na zobrazení dočasné hlášky
     

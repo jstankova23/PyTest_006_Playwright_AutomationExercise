@@ -4,7 +4,8 @@ Automatizované UI testy pro demo e‑shop https://automationexercise.com/ pomoc
 > Projekt je aktuálně v aktivním vývoji (work in progress).
 
 **Autor:**                      Jana Staňková  
-**Verze projektu:**             0.9.5 
+**Verze projektu:**             1.0.0 
+**Stav projektu:**              produkční stabilní verze (Final release)
 **Datum vytvoření:**            11. 11. 2025  
 **Datum poslední aktualizace:** 4. 12. 2025 
 **Python:**                     3.10+  
@@ -16,12 +17,37 @@ Automatizované UI testy pro demo e‑shop https://automationexercise.com/ pomoc
 
 Tento projekt obsahuje automatizované UI testy pro demo e‑shop: https://automationexercise.com
 
-Tento projekt obsahuje sadu 26 testů v Pythonu s využitím **pytest + Playwright** pro demo e‑shop 
-[automationexercise.com](https://automationexercise.com/). 
-Testy následují oficiální [Test Cases](https://automationexercise.com/test_cases).
-Projekt obsahuje pozitivní a negativní testy registrace uživatele, jeho přihlášení a odhlášení, komunikaci s e-shop webem přes kontaktní formulář s odesláním souboru v příloze, vyhledávání produktů, odběr novinek a veškerou manipulaci s objednávkou a fakturou. Testy pracují s produkty,
-které jsou na stránkách demo e-shopu koncipovány jako karty zabalené do obalu (wrapper) v mřížce. Pro vložení produktu je nutný hover nad danou
-kartou produktu, což vyvolá překrývací overlay vrstvu s nabídkou tlačítek nutných k nákupu. Testy pracují i s modálními okny a JavaScript alertem.
+Tento projekt obsahuje sadu 26 testů v Pythonu s využitím **pytest + Playwright** pro demo e‑shop [automationexercise.com](https://automationexercise.com/). 
+
+
+## Popis projektu
+
+Projekt obsahuje automatizované UI testy pro demo e-shop https://automationexercise.com a je realizován v jazyce **Python** s využitím
+frameworků **pytest + Playwright (sync API)**.
+
+Celkem je implementováno **26 testů**, které vycházejí z oficiálních testovacích scénářů dostupných na stránce https://automationexercise.com/test_cases  
+a pokrývají kompletní hlavní funkcionalitu aplikace – registraci a správu uživatelů, přihlašování a odhlašování, práci s produkty, ovládání nákupního košíku, 
+proces objednávky a platby, stahování faktury, odesílání formulářů i práci s dočasnými notifikacemi.
+
+Testy ověřují chování aplikace napříč celým uživatelským tokem uživatel - objednávka - platba - faktura, zahrnují oblasti:
+- registraci, přihlašování a odhlašování uživatelů,
+- vyhledávání a filtrování produktů,
+- vkládání produktů z různých sekcí stránky,
+- práce s pevnou mřížkou produktů s overlay vrstou, 
+- práce s carouselem doporučených položek,
+- ověřování prvků v hero banneru s carouselem,
+- ověřování stavu objednávky, adres a platby,
+- práce s dočasnými hláškami, dialogy a JavaScript alertem,
+- vyplňování a odesílání kontaktních formulářů, žádostí o odběr novinek, recenzí k produktu,
+- práce se soubory (upload i download)
+- pohyb po stránce.
+
+Každý test běží v izolovaném kontextu a pracuje s vlastním uživatelem, aby byla zajištěna **stabilita, opakovatelnost a nezávislost testů** při hromadném spouštění. 
+Výjimku tvoří pouze jeden sdílený **Session User**, používaný výhradně pro vybrané scénáře pro přihlášení a odhlášení uživatele.
+
+Projekt je navržen jako výukový i referenční ukázkový projekt pro automatizaci UI testů reálné webové aplikace pomocí Playwrightu.
+
+---
 
 ## PyTest + Playwright – AutomationExercise
 
@@ -90,8 +116,12 @@ PyTest_006_Playwright_AutomationExercise/
 │   ├── test_20_pw_login_after_cart.py
 │   ├── test_21_pw_product_review.py
 │   ├── test_22_pw_recommended_items.py
+│   ├── test_23_pw_order_reg_verify_address.py
+│   ├── test_24_pw_order_reg_pay_inv.py
+│   ├── test_25_pw_scroll_arrow.py
+│   ├── test_26_pw_scroll.py
 │   └── test_files/
-│       └── Sample.docx                      příloha pro test 'test_06_pw_contact_file_alert.py'
+│       └── Sample.docx                      příloha pro TC06 ('test_06_pw_contact_file_alert.py')
 ├── .gitignore
 ├── conftest.py                              fixtures
 ├── gdpr.json                                stav prohlížeče pro fixture 'context_gdpr'   
@@ -204,19 +234,6 @@ Soubor `tests/conftest.py` obsahuje klíčové fixtures:
 
 ---
 
-## Notifikace
-
-V rámci testů v Playwrightu jsou zpracovávány různé typy notifikací:
-
-1. **JavaScript alert se zpožděným výskytem**  
-   Test Case 6 – Contact Us Form  (`test_06_pw_contact_file_alert.py`)
-   
-2. **Dočasná notifikační hláška v DOM (flash message / success message)**  
-   Test Case 10 – Verify Subscription in home page (`test_10_pw_subscribe_footer.py`) 
-   Test Case 21 – Add review on product (`test_21_pw_product_review.py`)
-
----
-
 ## Práce s produkty a kontejnery produktových karet
 
 Aplikace **automationexercise.com** obsahuje **dva samostatné seznamy stejných produktů**, které se však liší způsobem zobrazení i způsobem vkládání do košíku. 
@@ -275,7 +292,44 @@ product_XX = recommended_products.filter(has=page.locator(f'a[data-product-id="{
 **Charakteristika:** - pohyblivý **carousel / slider**, - produkty mění třídy `item active`, `item`, `item next left` a nákup je možný u produktu pouze ve stavu s třídou
 `item active`, - **není potřeba hover**. **Tlačítko 'Add to Cart' je vždy přímo viditelné** na kartě, - ovládání pomocí šipek slideru.
 
-**Používá se v testech:** - TC22
+**Používá se v testech:** TC22
+
+---
+
+## Alerty
+
+V rámci testů v Playwrightu jsou zpracovávány různé typy alertů / notifikačních hlášek:
+
+### 1. JavaScript alert se zpožděným výskytem
+- JavaScript alert - browserový modal, není v DOM
+- Test Case 6 – Contact Us Form
+- Řešení: Registrace handleru s automatickým spuštěním v momentu vzniku alertu, 
+  Playwright zachytí alert přes událost dialog
+
+---
+
+### 2. Dočasná notifikační hláška v DOM (flash message / success message)
+- DOM element vytvořený JavaScriptem
+  Test Case 10 – Verify Subscription in home page (potvrzení odeslání formuláře k odběru novinek v záhlaví Home page)
+- Test Case 11 – Verify Subscription in Cart page (potvrzení odeslání formuláře k odběru novinek z nákupního košíku)
+- Test Case 21 – Add review on product (potvrzení odeslání recenze produktu)
+- Test Case 24 – Download Invoice after purchase order (potvrzení úspěšné platby objednávky)
+
+- Řešení:  
+  `expect(locator).to_be_visible(timeout=...)`
+
+---
+
+## Práce se soubory
+
+V rámci testů v Playwrightu se ověřuje práce se soubory těchto typů:
+
+### 1. Odeslání přílohy v kontaktním formuláři
+- **Test Case 6 – Contact Us Form**
+
+### 2. Stažení souboru s fakturou
+- **Test Case 24 – Download Invoice after purchase order**  
+  (test ověřuje úspěšné stažení souboru a obsahuje výpis cesty, kam byl soubor uložen)
 
 ---
 

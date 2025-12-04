@@ -5,7 +5,7 @@ PRO UI AUTOMATIZACI DEMO E-SHOPU (PLAYWRIGHT + PYTEST)
 =============================================================================================================================
 
 Autor:                      Jana Staňková
-Verze projektu:             0.9.5
+Verze projektu:             1.0.0
 Datum vytvoření:            11. 11. 2025
 Datum poslední aktualizace: 4. 12. 2025
 
@@ -175,15 +175,26 @@ def session_user(browser):                                  # využívá fixture
     # V případě úspěšného přihlášení uživatele čekání na stránku s textem "Enter Account Information"
     expect(page.get_by_text("Enter Account Information")).to_be_visible()
 
-    # Vyplnění povinných údajů
-    ### Oslovení a heslo                          
-    title_input = page.locator("#id_gender1")   # oslovení Mr. / pan
-    title = "Mrs."
-    title_input.check()
-
+    ### Vyplnění dalších údajů o dodavateli
+    ###### Oslovení (nepovinné) - vytvoření proměnné, dotahuje se do 1. řádku adres
+    ###### - Lokátory s proměnnými
+    mr_radio = page.locator("#id_gender1")      # id_gender1 = Mr. / pan
+    mrs_radio = page.locator("#id_gender2")     # id_gender2 = Mrs. / paní
+    ###### - Zaškrtnutí pole dle volby proměnné
+    mr_radio.check()                            # zaškrtnutí pole Mr. / pan
+    ###### - Dotažení hodnoty do proměnné 'title' podle skutečného stavu (zaškrtnutého pole Mr. nebo Mrs.)
+    title = None
+    if mr_radio.is_checked():
+        title = "Mr."
+    elif mrs_radio.is_checked():
+        title = "Mrs."
+    else:
+        print("INFO: Title was not checked.") # pokud není zaškrtnuté žádné pole, jen tisk hlášky, pole není povinné, žádná výjimka
+                     
+    ### Heslo (povinné)
     page.fill("#password", password)
 
-    ### Datum narození: 23. listopadu 1979
+    ### Datum narození: 23. listopadu 1979 (nepovinné)
     page.select_option("#days", "23")
     page.select_option("#months", "11")
     page.select_option("#years", "1979")
@@ -305,15 +316,26 @@ def test_2_user(page: Page):
     # V případě úspěšného přihlášení uživatele čekání na stránku s textem "Enter Account Information"
     expect(page.get_by_text("Enter Account Information")).to_be_visible()
 
-    # Vyplnění povinných údajů
-    ### Oslovení a heslo                          
-    title_input = page.locator("#id_gender2")   # Mrs. / paní
-    title = "Mrs."
-    title_input.check()
-
+    ### Vyplnění dalších údajů o dodavateli
+    ###### Oslovení (nepovinné) - vytvoření proměnné, dotahuje se do 1. řádku adres
+    ###### - Lokátory s proměnnými  
+    mr_radio = page.locator("#id_gender1")      # id_gender1 = Mr. / pan
+    mrs_radio = page.locator("#id_gender2")     # id_gender2 = Mrs. / paní
+    ###### - Zaškrtnutí pole dle volby proměnné
+    mrs_radio.check()                           # zaškrtnutí pole Mrs. / paní
+    ###### - Dotažení hodnoty do proměnné 'title' podle skutečného stavu (zaškrtnutého pole Mr. nebo Mrs.)
+    title = None
+    if mr_radio.is_checked():
+        title = "Mr."
+    elif mrs_radio.is_checked():
+        title = "Mrs."
+    else:
+        print("INFO: Title was not checked.") # pokud není zaškrtnuté žádné pole, jen tisk hlášky, pole není povinné, žádná výjimka
+                     
+    ###### Heslo (povinné)
     page.fill("#password", password)
 
-    ### Datum narození: 10. května 1990
+    ### Datum narození: 10. května 1990 (nepovinné)
     page.select_option("#days", "10")
     page.select_option("#months", "5")
     page.select_option("#years", "1990")
@@ -422,15 +444,26 @@ def test_16_user(page: Page):
     # V případě úspěšného přihlášení uživatele čekání na stránku s textem "Enter Account Information"
     expect(page.get_by_text("Enter Account Information")).to_be_visible()
 
-    # Vyplnění povinných údajů
-    ### Oslovení a heslo                          
-    title_input = page.locator("#id_gender2")   # Mr. / pan
-    title = "Mrs."
-    title_input.check()
-
+    ### Vyplnění dalších údajů o dodavateli
+    ###### Oslovení (nepovinné) - vytvoření proměnné, dotahuje se do 1. řádku adres
+    ###### - Lokátory s proměnnými  
+    mr_radio = page.locator("#id_gender1")      # id_gender1 = Mr. / pan
+    mrs_radio = page.locator("#id_gender2")     # id_gender2 = Mrs. / paní
+    ###### - Zaškrtnutí pole dle volby proměnné
+    mr_radio.check()                            # zaškrtnutí pole Mr. / pan
+    ###### - Dotažení hodnoty do proměnné 'title' podle skutečného stavu (zaškrtnutého pole Mr. nebo Mrs.)
+    title = None
+    if mr_radio.is_checked():
+        title = "Mr."
+    elif mrs_radio.is_checked():
+        title = "Mrs."
+    else:
+        print("INFO: Title was not checked.") # pokud není zaškrtnuté žádné pole, jen tisk hlášky, pole není povinné, žádná výjimka
+                     
+    ###### Heslo (povinné)
     page.fill("#password", password)
 
-    ### Datum narození: 17. října 2001
+    ### Datum narození: 17. října 2001 (nepovinné)
     page.select_option("#days", "17")
     page.select_option("#months", "10")
     page.select_option("#years", "2001")
@@ -540,15 +573,26 @@ def test_20_user(page: Page):
     # V případě úspěšného přihlášení uživatele čekání na stránku s textem "Enter Account Information"
     expect(page.get_by_text("Enter Account Information")).to_be_visible()
 
-    # Vyplnění povinných údajů
-    ### Oslovení a heslo                          
-    title_input = page.locator("#id_gender2")   # Mrs. / paní
-    title = "Mrs."
-    title_input.check()
-
+    ### Vyplnění dalších údajů o dodavateli
+    ###### Oslovení (nepovinné) - vytvoření proměnné, dotahuje se do 1. řádku adres
+    ###### - Lokátory s proměnnými  
+    mr_radio = page.locator("#id_gender1")      # id_gender1 = Mr. / pan
+    mrs_radio = page.locator("#id_gender2")     # id_gender2 = Mrs. / paní
+    ###### - Zaškrtnutí pole dle volby proměnné
+    mrs_radio.check()                           # zaškrtnutí pole Mrs. / paní
+    ###### - Dotažení hodnoty do proměnné 'title' podle skutečného stavu (zaškrtnutého pole Mr. nebo Mrs.)
+    title = None
+    if mr_radio.is_checked():
+        title = "Mr."
+    elif mrs_radio.is_checked():
+        title = "Mrs."
+    else:
+        print("INFO: Title was not checked.") # pokud není zaškrtnuté žádné pole, jen tisk hlášky, pole není povinné, žádná výjimka
+                     
+    ###### Heslo (povinné)
     page.fill("#password", password)
 
-    ### Datum narození: 3. dubna 1989
+    ### Datum narození: 3. dubna 1989 (nepovinné)
     page.select_option("#days", "3")
     page.select_option("#months", "4")
     page.select_option("#years", "1989")

@@ -20,9 +20,15 @@ product_XX = features_products.filter(has=page.locator(f'a[data-product-id="{pro
 from playwright.sync_api import Page, expect
 import uuid                                             # kvůli generování emailu v kroku 5 b)
 
-# 15: Place Order: Register before Checkout
-# TEST: REGISTRACE NOVÉHO UŽIVATELE, VLOŽENÍ 6. A 7. PRODUKTU DO KOŠÍKU Z HOME PAGE, KONTROLA OBJEDNÁVKY VČETNĚ ADRES, PLATBA A SMAZÁNÍ UŽIVATELE
-def test_order_reg_before_checkout(page: Page):
+# 23: Verify address details in checkout page
+# TEST: REGISTRACE NOVÉHO UŽIVATELE, VLOŽENÍ 13. A 14. PRODUKTU DO KOŠÍKU Z HOME PAGE, KONTROLA ADRES, SMAZÁNÍ UŽIVATELE (BEZ PLATBY)
+# Test stejný jako TC15: 'test_order_reg_before_checkout' v souboru 'test_15_pw_order_reg_before_checkout.py', kde je navíc i platba.
+# Tento test TC23 by měl správně porovnávat dodací adresu (Delivery Address) a adresu pro fakturaci (Billing Address) a zaměřit se na kontrolu jejich odlišných hodnot. 
+# Aktuálně ale demo e-shop umožňuje při registraci uživatele zadat jen jednu adresu. Tato adresa z registrace uživatele se dotahuje do nákupní objednávky do obou adres 
+# (Delivery Address, Billing Address), které jsou v objednávce chráněny proti zápisu, tzn. není možné adresy jakkoliv měnit.
+# Delivery Address a Billing Address jsou tak vždy shodné a obě se dotahují z jedné stejné adresy zadané při registraci uživatele. Test adres byl již proveden
+# v předcházejících testech (TC15, TC16). Aktuálně tento test TC23 je tedy duplicití. Odpovídá testu TC15, kde je navíc i platba.
+def test_order_reg_verify_address(page: Page):
     # 1. Launch browser; 
     # 2. Navigate to home url;
     # 3. Verify that home page is visible successfully
@@ -35,15 +41,15 @@ def test_order_reg_before_checkout(page: Page):
 
 
     # 5. Fill all details in Signup and create account
-    ### Kompletní registrace uživatele 'Test_15 User' určeného pouze pro tento test
-    ### Ukládání některých hodnot do proměnných, využijí se v kroku 12 při ověřování adres
+    ### Kompletní registrace uživatele 'Test_23 User' určeného pouze pro tento test
+    ### Ukládání některých hodnot do proměnných, využijí se při ověřování adres
     ### a) Ověření přesměrování na stránku s nadpisem 'New User Signup!'
     new_user_heading = page.get_by_role("heading", name="New User Signup!")   # lokátor pro nadpis 'New User Signup!' na nové stránce
     expect(new_user_heading).to_be_visible(timeout=2000)  # ověření s automatizovaným čekáním, že se na stránce objevil cílený nadpis
 
     ### b) Vytvoření hlavičky uživatele (jméno, email)
-    name = "Test_15 User" 
-    email = f"test_15_user_{uuid.uuid4().hex[:8]}@example.com" # dynamické vygenerování unikátního emailu
+    name = "Test_23 User" 
+    email = f"test_23_user_{uuid.uuid4().hex[:8]}@example.com" # dynamické vygenerování unikátního emailu
 
     name_input = page.get_by_role("textbox", name="Name")
     name_input.fill(name)
@@ -85,21 +91,21 @@ def test_order_reg_before_checkout(page: Page):
     pswd_input = page.get_by_role("textbox", name="Password *") 
     pswd_input.fill(pswd)                                       
 
-    ###### Datum narození: 31. prosince 1974
-    page.select_option("#days", "31")        
-    page.select_option("#months", "December")      
-    page.select_option("#years", "1974")     
+    ###### Datum narození: 7. září 1987 (nepovinné)
+    page.select_option("#days", "7")        
+    page.select_option("#months", "September")      
+    page.select_option("#years", "1987")     
 
     ###### Uložení hodnot do proměnných - dotahují se všechny do adres
-    first_name = "Test_15"                  
+    first_name = "Test_23"                  
     last_name = "User"                    
-    company = "AutoTest"                    # nepovinné
-    address1 = "214 Maple Ridge Avenue"
-    address2 = "Suite 310"                  # nepovinné
-    state = "Ontario"
-    city = "Toronto"
-    zip_code = "M5V 2T6"
-    mobile_num = "+1 (416) 555-7392"
+    company = "AutoTest"            # nepovinné
+    address1 = "27 MG Road"
+    address2 = "Flat 5B"            # nepovinné
+    state = "Maharashtra"
+    city = "Mumbai"
+    zip_code = "400001"
+    mobile_num = "+91 98765 43210"
                
     ###### Lokátory
     first_name_input = page.get_by_role("textbox", name="First name *")                    
@@ -124,7 +130,7 @@ def test_order_reg_before_checkout(page: Page):
     mobile_num_input.fill(mobile_num)
 
     ###### Výběr z roletového menu v poli Country
-    country = "Canada"                           # hodnota, která se dotahuje do adres
+    country = "India"                                   # hodnota, která se dotahuje do adres
     country_dropdown = page.get_by_label("Country *")   # lokátor pole Country s roletovým menu
     country_dropdown.select_option(country)             # výběr konkrétní hodnoty z roletového menu
 
@@ -144,24 +150,24 @@ def test_order_reg_before_checkout(page: Page):
 
 
     # 8. Add products to cart
-    ### Přidání 6. a 7. produktu dle pořadí zobrazení na stránce do košíku, identifikace konkrétních produktů probíhá ale podle jejich ID v DOM (ID neodpovídá vždy pořadí na stránce).   
+    ### Přidání 13. a 14. produktu dle pořadí zobrazení na stránce do košíku, identifikace konkrétních produktů probíhá ale podle jejich ID v DOM (ID neodpovídá vždy pořadí na stránce).   
     ### Seznam produktů je v horní části home page v sekci FEATURES ITEMS reprezentovaný gridem / mřížkou karet produktů;
     ### Každý produkt = jedna karta (v gridu / mřížce)
     ### Všechny karty mají stejnou třídu <div class="product-image-wrapper">...</div>
     features_container = page.locator("div.features_items")                      # lokátor pro kontejner/sekci features items položek v horní části home page
     features_products = features_container.locator(".product-image-wrapper")     # vnořený lokátor, kolekce všech karet produktů v kontejneru/sekci features items položek
     
-    ### Přidání 6. produktu do košíku
+    ### Přidání 13. produktu do košíku
     ###### a) Vyhledání 6. produktu dle ID přes href v mřížce a hover
-    product_id = "6"
-    product_6 = features_products.filter(has=page.locator(f"a[data-product-id='{product_id}']")).first # vyhledání první karty produktu z mřížky (products), která obsahuje odkaz na detail produktu s daným ID
-    product_6.scroll_into_view_if_needed() # pokud je karta produktu mimo viditelnou část stránky, Playwright ji posune do zorného pole, overlay se často aktivuje jen na viditelné kartě
-    product_6.hover()                      # simulace najetí myší na kartu produktu, tím se zobrazí overlay vrstva (.product-overlay) a v ní tlačítko 'Add to cart'
+    product_id = "15"                       # POZOR: pořadové číslo produktu viditelné z aplikace neodpovídá ID produktu v DOM
+    product_13 = features_products.filter(has=page.locator(f"a[data-product-id='{product_id}']")).first # vyhledání první karty produktu z mřížky (products), která obsahuje odkaz na detail produktu s daným ID
+    product_13.scroll_into_view_if_needed() # pokud je karta produktu mimo viditelnou část stránky, Playwright ji posune do zorného pole, overlay se často aktivuje jen na viditelné kartě
+    product_13.hover()                      # simulace najetí myší na kartu produktu, tím se zobrazí overlay vrstva (.product-overlay) a v ní tlačítko 'Add to cart'
 
     ###### b) Overlay vrstva: Kliknutí na tlačítko 'Add to Cart'
-    add_to_cart_prod6_btn = product_6.locator(".overlay-content .btn") # vyhledání tlačítka 'Add to Cart' v overlay vrstvě (vnořený lokátor) UVNITŘ TÉTO KONKRÉTNÍ KARTY produktu 
-    add_to_cart_prod6_btn.wait_for(state="visible") # vyčkání, až se overlay vrstva skutečně ukáže
-    add_to_cart_prod6_btn.click(force=True)         # kliknutí na tlačítko 'Add to Cart', i když ho dočasně něco překrývá, klik i při krátkém překrytí karty produktu
+    add_to_cart_prod13_btn = product_13.locator(".overlay-content .btn") # vyhledání tlačítka 'Add to Cart' v overlay vrstvě (vnořený lokátor) UVNITŘ TÉTO KONKRÉTNÍ KARTY produktu 
+    add_to_cart_prod13_btn.wait_for(state="visible") # vyčkání, až se overlay vrstva skutečně ukáže
+    add_to_cart_prod13_btn.click(force=True)         # kliknutí na tlačítko 'Add to Cart', i když ho dočasně něco překrývá, klik i při krátkém překrytí karty produktu
 
     ###### c) Modal: Kliknutí na tlačítko 'Continue Shopping' v modalu (popup / vyskakovací okno s tlačítkem 'Continue Shopping')
     continue_shop_btn = page.get_by_role("button", name="Continue Shopping") # lokátor pro tlačítko 'Continue Shopping'
@@ -170,17 +176,17 @@ def test_order_reg_before_checkout(page: Page):
     page.wait_for_selector("button:has-text('Continue Shopping')", state="hidden")  # vyčkání na zavření modalu (skrytý stav modalu / tlačítka), pak teprve přejít na další produkt
 
 
-    ### Přidání 7. produktu do košíku
+    ### Přidání 14. produktu do košíku
     ###### a) Vyhledání 7. produktu dle ID přes href v gridu a hover
-    product_id = "7"
-    product_7 = features_products.filter(has=page.locator(f"a[data-product-id='{product_id}']")).first
-    product_7.scroll_into_view_if_needed()  
-    product_7.hover()
+    product_id = "16"                       # POZOR: pořadové číslo produktu viditelné z aplikace neodpovídá ID produktu v DOM
+    product_14 = features_products.filter(has=page.locator(f"a[data-product-id='{product_id}']")).first
+    product_14.scroll_into_view_if_needed()  
+    product_14.hover()
 
     ###### b) Overlay vrstva: Kliknutí na tlačítko 'Add to Cart'
-    add_to_cart_prod7_btn = product_7.locator(".overlay-content .btn")
-    add_to_cart_prod7_btn.wait_for(state="visible") 
-    add_to_cart_prod7_btn.click(force=True)
+    add_to_cart_prod14_btn = product_14.locator(".overlay-content .btn")
+    add_to_cart_prod14_btn.wait_for(state="visible") 
+    add_to_cart_prod14_btn.click(force=True)
 
     ###### c) Modal: Kliknutí na tlačítko 'Continue Shopping'
     continue_shop_btn = page.get_by_role("button", name="Continue Shopping")
@@ -208,7 +214,10 @@ def test_order_reg_before_checkout(page: Page):
     proceed_to_checkout_link.click()                                            # kliknutí na link
 
 
-    # 12. Verify Address Details and Review Your Order
+    # 12. Verify that the delivery address is same address filled at the time registration of account
+    # 13. Verify that the billing address is same address filled at the time registration of account
+    # OBA ÚKOLY JSOU SHODNÉ, AKTUÁLNĚ APLIKACE UMOŽŇUJE ZADAT JEN JEDNU ADRESU PŘI REGISTRACI UŽIVATELE A V NÁKUPNÍ OBJEDNÁVCE SE DANÁ ADRESA Z REGISTRACE DOTAHUJE
+    # DO DODACÍ ADRESY A DO ADRESY PRO FAKTURACI A APLIKACE AKTUÁLNĚ NEUMOŽŇUJE TYTO ADRESY JAKKOLIV MĚNIT (POLE JSOU CHRÁNĚNA PROTI ZÁPISU)
     ### a) Kontrola dodací a fakturační adresy
     ##### Porovnávají se údaje zadané při registraci uživatele 'Test_15 User' (proměnné definované přímo v tomto testu) proti údajům zobrazeným v adresách objednávky v UI.
     ##### Demo aplikace aktuálně neumožňuje zadat rozdílnou dodací a fakturační adresu, proto jsou v tuto chvíli obě adresy shodné.
@@ -296,66 +305,24 @@ def test_order_reg_before_checkout(page: Page):
     order_table = page.locator("#cart_info")                   
     expect(order_table).to_be_visible()
 
-    ### Kontrola pouze přítomnosti produktů 6 a 7 v objednávce
+    ### Kontrola pouze přítomnosti produktů 13 a 14 v objednávce
     ### (bez kontroly množství a cen z důvodu hromadného spuštění testů)
     ### Identifikace konkrétních produktů je provedena jako VNOŘENÝ LOKÁTOR 
     ### Lokátor řádku produktu je definován UVNITŘ lokátoru celé tabulky objednávky
-    product_6_row = order_table.locator("tr#product-6")   # lokátor pro řádek produktu 6 vnořený do lokátoru pro tabulku objednávky
-    product_7_row = order_table.locator("tr#product-7")   # lokátor pro řádek produktu 7 vnořený do lokátoru pro tabulku objednávky
+    product_13_row = order_table.locator("tr#product-15")   # lokátor pro řádek produktu 6 vnořený do lokátoru pro tabulku objednávky, POZOR: ID neodpovídá pořadovému čislu v UI
+    product_14_row = order_table.locator("tr#product-16")   # lokátor pro řádek produktu 7 vnořený do lokátoru pro tabulku objednávky, POZOR: ID neodpovídá pořadovému čislu v UI
 
     ### Ověření, že jsou oba produkty skutečně přítomny v objednávce
-    expect(product_6_row).to_be_visible()
-    expect(product_7_row).to_be_visible()
+    expect(product_13_row).to_be_visible()
+    expect(product_14_row).to_be_visible()
 
 
-    # 13. Enter description in comment text area and click 'Place Order'
-    ### Vložení komentáře do boxu s popisem "If you would like to add a comment ..."
-    comment_text_area = page.locator("textarea[name=\"message\"]")  
-    comment_text_area.fill("Test_15 User - test comment.")
-
-    place_order_link = page.get_by_role("link", name="Place Order")
-    place_order_link.click()
-
-
-    # 14. Enter payment details: Name on Card, Card Number, CVC, Expiration date
-    ### Uložení hodnot do proměnných
-    name_on_card = "Test_15 User"
-    card_number = "5555 6666 7777 8888"
-    cvc = "888"
-    mm = "04"
-    yyyy = "2030"
-
-    ### Lokátory
-    name_on_card_input = page.locator("input[name=\"name_on_card\"]")
-    card_number_input = page.locator("input[name=\"card_number\"]")
-    cvc_input = page.get_by_role("textbox", name="ex.")
-    mm_input = page.get_by_role("textbox", name="MM")
-    yyyy_input = page.get_by_role("textbox", name="YYYY")
-
-    ### Vyplnění polí
-    name_on_card_input.fill(name_on_card)
-    card_number_input.fill(card_number)
-    cvc_input.fill(cvc)
-    mm_input.fill(mm)
-    yyyy_input.fill(yyyy)
-    
-    
-    # 15. Click 'Pay and Confirm Order' button
-    pay_and_confirm_btn = page.get_by_role("button", name="Pay and Confirm Order")
-    pay_and_confirm_btn.click()
-
-
-    # 16. Verify success message 'Your order has been placed successfully!'
-    success_message = page.get_by_text("Congratulations! Your order")
-    expect(success_message).to_be_visible()
-
-
-    # 17. Click 'Delete Account' button
+    # 14. Click 'Delete Account' button
     delete_acc_link = page.get_by_role("link", name=" Delete Account") # lokátor na link 'Delete Account' v záhlaví stránky
     delete_acc_link.click()                                             # kliknutí na link
 
 
-    # 18. Verify 'ACCOUNT DELETED!' and click 'Continue' button
+    # 15. Verify 'ACCOUNT DELETED!' and click 'Continue' button
     account_deleted_message = page.get_by_text("Account Deleted!")           # vyhledání hlášky 'Account Deleted'
     expect(account_deleted_message).to_be_visible # ověření s automatizovaným čekáním, že se na stránce objevil cílený text
 

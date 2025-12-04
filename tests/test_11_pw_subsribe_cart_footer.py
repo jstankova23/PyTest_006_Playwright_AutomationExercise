@@ -6,6 +6,7 @@ from playwright.sync_api import Page, expect
 
 # 11_TEST CASE: Verify Subscription in Cart page
 # TEST REGISTRACE K ODBĚRU NOVINEK ZE ZÁPATÍ STRÁNKY S NÁKUPNÍM KOŠÍKEM (CART), I S POTVRZENÍM DOČASNÉ HLÁŠKY
+# Test ověřuje dočasnou hlášku v DOM (success alert) po potvrzení formuláře pro odběr novinek.
 def test_subscribe_cart_footer(page: Page):
     # 1. Launch browser; 
     # 2. Navigate to home url;
@@ -43,7 +44,7 @@ def test_subscribe_cart_footer(page: Page):
     ### - šipkou na debugovací liště postupně krokovat až do momentu zobrazení dané hlášky
     ### - kliknout na ikonku pro získání selektoru a označit danou hlášku
     ### - v záložce Elements dle označení pozice elementu v DOM sestavit si ručně CSS lokátor unikátní pro danou stránku
-    ### - třída 'alert-success' není na stránce unikátní, tuto třídu využívá i hláška po úspěšně odeslaném review na produkt (TC21)
+    ### - lokátor pouze s třídou není na stránce unikátní, tuto třídu využívá i hláška po úspěšně odeslaném review na produkt (TC21)
     success_subs_msg = page.locator("#success-subscribe")  # CSS lokátor na dočasnou hlášku, nutné ID, třída 'alert-success' by nestačila
     expect(success_subs_msg).to_be_visible(timeout=1000)   # vyčkání na zobrazení dočasné hlášky
 

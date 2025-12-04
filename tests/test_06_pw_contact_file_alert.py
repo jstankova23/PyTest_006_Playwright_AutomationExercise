@@ -93,7 +93,7 @@ def test_contact_file_alert(page: Page):
     ### Slider rotuje (na domovské stránce se obměňují 3 různé slidy, ale každý obsahuje zelené tlačítko (link) s textem 'Test Cases'.
     ### V CSS lokátoru je nutné použít 2 třídy: .item.active pro výběr právě zobrazeného slidu, vždy je aktivní a viditelný pro uživatele pouze jeden slide,
     ### bez lokátoru tříd (.item.active) Playwright neví, ze kterých 3 slidů má dané tlačítko vybrat
-    hero_test_cases_btn = page.locator("section#slider .item.active a[href='/test_cases'] > button") # CSS složený lokátor pro tlačítko/link 'Test Cases'
+    hero_test_cases_btn = page.locator("section#slider .item.active a[href='/test_cases'] > button") # lokátor pro tlačítko/link 'Test Cases' v právě aktivním slidu
     expect(hero_test_cases_btn).to_be_visible()
            
 

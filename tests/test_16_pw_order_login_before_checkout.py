@@ -180,26 +180,39 @@ def test_order_login_before_checkout(page: Page, test_16_user): # fixture 'test_
 
     ##### POROVNÁNÍ ÚDAJŮ Z REGISTRACE UŽIVATELE 'Test_16 User' VS. UI (INFO Z OBJEDNÁVKY)
 
-    ######## YOUR DELIVERY ADDRESS – ověření dodací adresy
-    ######## Ověřují se klíčové hodnoty zadané při registraci uživatele 'Test_16 User' (ne formát ani pořadí řádků)
-    title_full_name = f'{test_16_user["title"]} {test_16_user["first_name"]} {test_16_user["last_name"]}' # 1.řádek adresy: oslovení (Mr./Mrs.) + celé jméno, proměnnou využívají obě adresy
-    expect(delivery_block).to_contain_text(title_full_name)     # ověření, zda text složený z oslovení a celého jména existuje někde v bloku s dodací adresou
+    ### YOUR DELIVERY ADDRESS – ověření dodací adresy
+    ##### Ověřují se klíčové hodnoty zadané při registraci (ne formát ani pořadí řádků)
 
-    ##### For cyklus projde všechna definiovaná pole adresy a ověří jejich přítomnost pouze v případě, že má uživatel dané pole skutečně vyplněno
-    for field in address_fields:                              # Cyklus prochází seznam klíčů (address_fields),
-        value = test_16_user.get(field)                          # pro každý klíč si vezme hodnotu z fixture 'test_16_user' pro registraci uživatele 'Test_16 User',
-        if value:                                             # pokud hodnota ve fixture existuje,
-            assert value in delivery_block.inner_text(), f"Delivery address validation failed for field '{field}': '{value}' not found in delivery address."  
+    ##### - První řádek adresy
+    ##### Nepovinné oslovení (Mr./Mrs.) + povinné celé jméno - STEJNÉ PRO OBĚ ADRESY
+    ##### Checkbox 'title' (Mr./Mrs.) není povinný, pole pro obě pohlaví mohou být prázdný; IF ošetří, aby se v oslovení nebojevilo 'None'
+    if test_16_user["title"]:      
+        title_full_name = f"{test_16_user["title"]} {test_16_user["first_name"]} {test_16_user["last_name"]}"
+    else:
+        title_full_name = f"{test_16_user["first_name"]} {test_16_user["last_name"]}" 
+
+    ##### - Ověření výsledné sloučené hodnoty pro 1. řádek dodací adresy
+    expect(delivery_block).to_contain_text(title_full_name)
+
+    ##### - Ověření ostatních řádků dodací adresy
+    ##### For cyklus projde všechna definovaná pole adresy a ověří jejich přítomnost pouze v případě, že má uživatel dané pole skutečně vyplněno
+    for field in address_fields:
+        value = test_16_user.get(field)     # pro každý klíč si vezme hodnotu z fixture 'test_16_user' pro registraci uživatele 'Test_16 User',
+        if value:                           # pokud hodnota ve fixture existuje,
+            assert value in delivery_block.inner_text(), f"Delivery address validation failed for field '{field}': '{value}' not found in delivery address."
             # ověří, že se hodnota nachází v UI - v objednávce v textu bloku pro dodací adresu, jinak test spadne s popisem pole
 
-    ######## YOUR BILLING ADDRESS – ověření fakturační adresy
-    ######## Stejné ověření a postup jako u dodací adresy, porovnávají se údaje z registrace uživatele z fixture proti hodnotám v UI (v objednávce).
+
+    ### YOUR BILLING ADDRESS – ověření adresy pro fakturaci
+    ##### - Ověření výsledné sloučené hodnoty pro 1. řádek adresy pro fakturaci (aktuálně demo web má vždy obě adresy shodné)
     expect(billing_block).to_contain_text(title_full_name)
 
+    ##### - Ověření ostatních řádků adresy pro fakturaci
     for field in address_fields:
         value = test_16_user.get(field)
         if value:
-            assert value in billing_block.inner_text(), f"Billing address validation failed for field '{field}': '{value}' not found in billing address."  
+            assert value in billing_block.inner_text(), \
+                f"Billing address validation failed for field '{field}': '{value}' not found in billing address."
 
 
 

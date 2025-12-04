@@ -21,7 +21,7 @@ from playwright.sync_api import Page, expect
 import uuid                                             # kvůli generování emailu v kroku 9 b)
 
 # 14: Place Order: Register while Checkout
-# TEST: OOBJEDNÁVKA 3. A 4. PRODUKTU S REGISTRACÍ UŽIVATELE 'Test_14 User' PŘI DOKONČENÍ OBJEDNÁVKY, PLATBA A SMAZÁNÍ UŽIVATELE
+# TEST: OBJEDNÁVKA 3. A 4. PRODUKTU S REGISTRACÍ UŽIVATELE 'Test_14 User' PO VLOŽENÍ PRODUKTŮ DO KOŠÍKU, OVĚŘENÍ ADRES A OBJEDNÁVKY, VLOŽENÍ KOMENTÁŘE, PLATBA A SMAZÁNÍ UŽIVATELE
 
 def test_order_reg_checkout(page: Page):
     # 1. Launch browser; 
@@ -131,17 +131,28 @@ def test_order_reg_checkout(page: Page):
     ### d) V případě úspěšného přihlášení uživatele čekání na stránku s textem "Enter Account Information"
     expect(page.get_by_text("Enter Account Information")).to_be_visible()
 
-    ### e) Vyplnění povinných údajů
-    ###### Oslovení a heslo                          
-    title_input = page.locator("#id_gender2")   # Mrs. / paní
-    title = "Mrs."
-    title_input.check()
-
+    ### e) Vyplnění dalších údajů o dodavateli
+    ###### Oslovení (nepovinné)  - vytvoření proměnné, dotahuje se do 1. řádku adres
+    ###### - Lokátory s proměnnými  
+    mr_radio = page.locator("#id_gender1")      # id_gender1 = Mr. / pan
+    mrs_radio = page.locator("#id_gender2")     # id_gender2 = Mrs. / paní
+    ###### - Zaškrtnutí pole dle volby proměnné
+    mrs_radio.check()                            # zaškrtnutí pole Mrs. / paní
+    ###### - Dotažení hodnoty do proměnné 'title' podle skutečného stavu (zaškrtnutého pole Mr. nebo Mrs.)
+    title = None
+    if mr_radio.is_checked():
+        title = "Mr."
+    elif mrs_radio.is_checked():
+        title = "Mrs."
+    else:
+        print("INFO: Title was not checked.") # pokud není zaškrtnuté žádné pole, jen tisk hlášky, pole není povinné, žádná výjimka
+                     
+    ###### Heslo (povinné)
     pswd = "TestPassword123"                                    
     pswd_input = page.get_by_role("textbox", name="Password *") 
     pswd_input.fill(pswd)                                       
 
-    ###### Datum narození: 8. srpna 1988
+    ###### Datum narození: 8. srpna 1988 (nepovinné)
     page.select_option("#days", "8")        
     page.select_option("#months", "August")      
     page.select_option("#years", "1988")     
@@ -149,9 +160,9 @@ def test_order_reg_checkout(page: Page):
     ###### Uložení hodnot do proměnných - dotahují se všechny do adres
     first_name = "Test_14"                  
     last_name = "User"                    
-    company = "AutoTest"                    
+    company = "AutoTest"            # nepovinné         
     address1 = "742 Market Street"      
-    address2 = "Apt. 333"         
+    address2 = "Apt. 333"           # nepovinné
     state = "Pennsylvania"                       
     city = "Philadelphia"                       
     zip_code = "19106"                      
@@ -255,9 +266,19 @@ def test_order_reg_checkout(page: Page):
 
     ### YOUR DELIVERY ADDRESS – ověření dodací adresy
     ##### Ověřují se klíčové hodnoty zadané při registraci (ne formát ani pořadí řádků)
-    title_full_name = f"{title} {first_name} {last_name}"   # 1. řádek adresy: oslovení (Mr./Mrs.) + celé jméno, proměnnou využívají obě adresy
+
+    ##### - První řádek adresy
+    ##### Nepovinné oslovení (Mr./Mrs.) + povinné celé jméno - STEJNÉ PRO OBĚ ADRESY
+    ##### Checkbox 'title' (Mr./Mrs.) není povinný, pole pro obě pohlaví mohou být prázdný; IF ošetří, aby se v oslovení nebojevilo 'None'
+    if title:      
+        title_full_name = f"{title} {first_name} {last_name}"
+    else:
+        title_full_name = f"{first_name} {last_name}" 
+
+    ##### - Ověření výsledné sloučené hodnoty pro 1. řádek dodací adresy
     expect(delivery_block).to_contain_text(title_full_name)
 
+    ##### - Ověření ostatních řádků dodací adresy
     ##### For cyklus projde všechna definovaná pole adresy a ověří jejich přítomnost pouze v případě, že má uživatel dané pole skutečně vyplněno
     for field in address_fields:
         value = test_user_data.get(field)     # hodnota z registrace uživatele v rámci tohoto testu
@@ -266,10 +287,11 @@ def test_order_reg_checkout(page: Page):
                 f"Delivery address validation failed for field '{field}': '{value}' not found in delivery address."
 
 
-    ### YOUR BILLING ADDRESS – ověření fakturační adresy
-    ##### Stejné porovnání jako u dodací adresy (aktuálně demo web má vždy obě adresy shodné)
+    ### YOUR BILLING ADDRESS – ověření adresy pro fakturaci
+    ##### - Ověření výsledné sloučené hodnoty pro 1. řádek adresy pro fakturaci (aktuálně demo web má vždy obě adresy shodné)
     expect(billing_block).to_contain_text(title_full_name)
 
+    ##### - Ověření ostatních řádků adresy pro fakturaci
     for field in address_fields:
         value = test_user_data.get(field)
         if value:

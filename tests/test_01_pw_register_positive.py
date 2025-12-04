@@ -52,11 +52,22 @@ def test_registration_positive(page: Page):
     expect(new_page_heading).to_be_visible(timeout=2000)  # ověření s automatizovaným čekáním, že se na stránce objevil cílený nadpis
 
     # 9. Fill details: Title, Name, Email, Password, Date of birth
-    ###### Oslovení a heslo                          
-    title_input = page.locator("#id_gender2")   # Mrs. / paní
-    title = "Mrs."
-    title_input.check()
-
+    ### Oslovení (nepovinné) - vytvoření proměnné, dotahuje se do 1. řádku adres (adresy nejsou součástí tohoto testu)
+    ###### - Lokátory s proměnnými  
+    mr_radio = page.locator("#id_gender1")      # id_gender1 = Mr. / pan
+    mrs_radio = page.locator("#id_gender2")     # id_gender2 = Mrs. / paní
+    ###### - Zaškrtnutí pole dle volby proměnné
+    mr_radio.check()                            # zaškrtnutí pole Mr. / pan
+    ###### - Dotažení hodnoty do proměnné 'title' podle skutečného stavu (zaškrtnutého pole Mr. nebo Mrs.)
+    title = None
+    if mr_radio.is_checked():
+        title = "Mr."
+    elif mrs_radio.is_checked():
+        title = "Mrs."
+    else:
+        print("INFO: Title was not checked.") # pokud není zaškrtnuté žádné pole, jen tisk hlášky, pole není povinné, žádná výjimka
+                     
+    ###### Heslo (povinné)
     pswd = "TestPassword123"                                    # uložení hesla do proměnné
     pswd_input = page.get_by_role("textbox", name="Password *") # lokátor pole Password
     pswd_input.fill(pswd)                                       # vyplnění pole Password
@@ -78,9 +89,9 @@ def test_registration_positive(page: Page):
     ### Uložení hodnot pro adresu a telefon uživatele do proměnných
     first_name = "Test_1"                     
     last_name = "User"                  
-    company = "AutoTest"    
-    address1 = "15 Kowhai Street"
-    address2 = "Flat 2A"
+    company = "AutoTest"            # nepovinné
+    address1 = "15 Kowhai Street" 
+    address2 = "Flat 2A"            # nepovinné
     state = "Auckland"
     city = "Auckland"
     zip_code = "1023"
