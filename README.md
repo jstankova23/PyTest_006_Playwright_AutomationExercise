@@ -313,7 +313,6 @@ V rámci testů v Playwrightu jsou zpracovávány různé typy alertů / notifik
   Test Case 10 – Verify Subscription in home page (potvrzení odeslání formuláře k odběru novinek v záhlaví Home page)
 - Test Case 11 – Verify Subscription in Cart page (potvrzení odeslání formuláře k odběru novinek z nákupního košíku)
 - Test Case 21 – Add review on product (potvrzení odeslání recenze produktu)
-- Test Case 24 – Download Invoice after purchase order (potvrzení úspěšné platby objednávky)
 
 - Řešení:  
   `expect(locator).to_be_visible(timeout=...)`
