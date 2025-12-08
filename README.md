@@ -93,7 +93,6 @@ Díky tomu:
 ```
 PyTest_006_Playwright_AutomationExercise/
 ├── tests/
-│   ├── test_00_pw_gdpr.py
 │   ├── test_01_pw_register_positive.py
 │   ├── test_02_pw_login_positive.py
 │   ├── test_03_pw_login_negative.py
@@ -137,7 +136,6 @@ PyTest_006_Playwright_AutomationExercise/
 Níže je kompletní přepis seznamu Test Cases ze stránky:  
 https://automationexercise.com/test_cases
 
-### **Test Case 0:** Accept GDPR (přidáno, není v seznamu Test Cases)
 ### **Test Case 1:** Register User  
 ### **Test Case 2:** Login User with correct email and password  
 ### **Test Case 3:** Login User with incorrect email and password  
