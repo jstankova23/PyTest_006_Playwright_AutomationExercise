@@ -106,7 +106,6 @@ def context_gdpr(browser):
 
 
 # 3) FIXTURE PRO VYTVOŘENÍ STRÁNKY (page)
-# 3) FIXTURE PRO VYTVOŘENÍ STRÁNKY (page)
 # Vytváří novou stránku (tab) nad 'context_gdpr'.
 # Automaticky:
 # - odstraní reklamní iframe bannery pomocí add_init_script pomocí add_init_script,

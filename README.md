@@ -89,7 +89,7 @@ Díky tomu:
 
 ---
 
-## Adresářová struktura projektu (nedokončena, fáze vývoje)
+## Adresářová struktura projektu
 ```
 PyTest_006_Playwright_AutomationExercise/
 ├── tests/
