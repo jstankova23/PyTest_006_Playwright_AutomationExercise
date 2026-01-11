@@ -187,19 +187,68 @@ Ostatní uživatelé jsou **unikátní pro každý test**. Liší se pouze způs
 
 ---
 
-### Přehledná tabulka uživatelů
+## Uživatelé
 
-| Typ uživatele    | Email     | Vytváří                | Maže           | Životnost | Použití    |
-|------------------|-----------|------------------------|----------------|-----------|------------|
-| **Session User** | dynamický | fixture `session_user` | fixture        | celý běh  | TC04, TC05 |
-| **Test 1 User**  | dynamický | samotný test           | test           | per-test  | TC01       |
-| **Test 2 User**  | dynamický | fixture `test_2_user`  | test / fixture | per-test  | TC02       |
-| **Test 14 User** | dynamický | test                   | test           | per-test  | TC14       |
-| **Test 15 User** | dynamický | test                   | test           | per-test  | TC15       |
-| **Test 16 User** | dynamický | fixture `test_16_user` | test / fixture | per-test  | TC16       |
-| **Test 20 User** | dynamický | fixture `test_20_user` | fixture        | per-test  | TC20       |
-| **Test 23 User** | dynamický | test                   | test           | per-test  | TC23       |
-| **Test 24 User** | dynamický | test                   | test           | per-test  | TC24       |
+V tomto projektu jsou **všichni testovací uživatelé vytvářeni s dynamicky generovaným emailem**.
+
+Každý uživatel je na konci testu **odstraněn**, s výjimkou uživatele **`session_user`**, který:
+- je **session scoped**,
+- je automaticky vytvořen **před spuštěním prvního testu**,
+- a je odstraněn **až po doběhnutí celé testovací session**.
+
+Uživatelé jsou v projektu vytvářeni **dvěma způsoby**:
+1. pomocí **fixtures**
+2. přímo **v rámci jednotlivých testů**
+
+---
+
+### 1. Uživatelé vytváření přes fixtures
+
+Fixtures jsou používány v testech, kde je **předpokladem již existující uživatel**.
+
+Uživatelé vytvoření přes fixtures se dělí do dvou podkategorií podle jejich životnosti a chování v testech.
+
+#### a) Session-scoped uživatel
+
+- Vytvářen pomocí fixture `session_user`
+- Má **session scope**
+- Je **sdílen napříč více testy**
+- V testech **neprovádí nákup**
+- Je vytvořen před prvním testem a smazán po ukončení celé session
+
+#### b) Function-scoped uživatelé (per-test)
+
+- Vytvářeni pomocí samostatných fixtures (např. `test_2_user`, `test_16_user`, `test_20_user`)
+- Mají **function scope**
+- Jsou **unikátní pro každý jednotlivý test**
+- V testech **provádějí nákup**
+- Jsou po dokončení testu odstraněni (v rámci testu nebo fixture)
+
+Níže je přehled uživatelů vytvářených **pomocí fixtures**:
+
+#### Přehledná tabulka uživatelů (fixtures)
+
+| Typ uživatele    | Email     | Vytváří               | Maže            | Životnost | Použití    |
+|------------------|-----------|-----------------------|------------------|-----------|------------|
+| **Session User** | dynamický | fixture `session_user`| fixture          | celý běh  | TC04, TC05 |
+| **Test 1 User**  | dynamický | test                  | test             | per-test  | TC01       |
+| **Test 2 User**  | dynamický | fixture `test_2_user` | test / fixture   | per-test  | TC02       |
+| **Test 14 User** | dynamický | test                  | test             | per-test  | TC14       |
+| **Test 15 User** | dynamický | test                  | test             | per-test  | TC15       |
+| **Test 16 User** | dynamický | fixture `test_16_user`| test / fixture   | per-test  | TC16       |
+| **Test 20 User** | dynamický | fixture `test_20_user`| fixture          | per-test  | TC20       |
+| **Test 23 User** | dynamický | test                  | test             | per-test  | TC23       |
+| **Test 24 User** | dynamický | test                  | test             | per-test  | TC24       |
+
+---
+
+### 2. Uživatelé vytváření přímo v testech
+
+Uživatelé jsou v těchto případech **vytvářeni přímo v těle testu**, v souladu s konkrétním test case.
+
+- Vždy mají **per-test životnost**
+- Nejsou sdíleni mezi testy
+- Jsou po dokončení testu odstraněni
 
 ---
 
@@ -245,7 +294,7 @@ Proto je **nutné vždy nejprve zúžit výběr na správný kontejner**, **a a�
 postavena **na kontejneru**, nikoli pouze na kolekci karet produktů (`.product-image-wrapper`), nedochází tak ke kolizi mezi horní a spodní sekcí na Home Page.
 
 **VÝZNAM**:       kontejner                                > kolekce karet                            > produkt
-**PROMĚNNÁ**:     features_container/recommended_cotainer  > features_products/recommended_products   > product_XX (XX - pořadové číslo na stránce pro uživatele)
+**PROMĚNNÁ**:     features_container/recommended_container > features_products/recommended_products   > product_XX (XX - pořadové číslo na stránce pro uživatele)
 **CSS SELEKTOR**: div.features_items/div.recommended_items > .product-image-wrapper                   > a[data-product-id="YY"]
                                                                                                         product_id = "YY" (YY - ID productu v DOM)
 

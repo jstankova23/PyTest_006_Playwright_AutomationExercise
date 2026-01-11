@@ -366,13 +366,15 @@ def test_order_reg_pay_inv(page: Page):
     # 19. Click 'Download Invoice' button and verify invoice is downloaded successfully.
     download_inv_btn = page.get_by_role("link", name="Download Invoice")    # lokátor pro tlačítko 'Download Invoice"
 
+    ### 'page.expect_download()' čeká na download event, jakmile ke stažení dojde, výsledek se uloží do proměnné 'download_info'
+    ### 'download_info' není samotný soubor, jedná se o objekt, který čeká na dokončení downloadu, umožní získat stažený soubor přes `download_info.value`
     with page.expect_download() as download_info:
-        download_inv_btn.click()
+        download_inv_btn.click()                        # kliknutí na tlačítko „Download Invoice“, které spustí download faktury
 
-    download = download_info.value
+    download = download_info.value                      # získání objektu staženého souboru
 
     # Kontrola, že soubor s fakturou skutečně existuje
-    download_path = download.path()
+    download_path = download.path()                                     # 'path()' vrací cestu k souboru v dočasném adresáři Playwrightu
     assert download_path.exists(), "Invoice was not downloaded."
     print(f"INFO: Invoice successfully downloaded to: {download_path}") # možnost tisku hlášky s uvedením přesné cesty pro testy
 
